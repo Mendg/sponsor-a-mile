@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import sql, { getAvailableMiles } from '@/lib/db';
+import { getDb, getAvailableMiles } from '@/lib/db';
 
 export async function GET(request, { params }) {
   try {
     const { slug } = params;
+    const sql = getDb();
 
     // Get runner by slug
     const runners = await sql`
