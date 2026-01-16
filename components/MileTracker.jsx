@@ -94,7 +94,21 @@ export default function MileTracker({
       </div>
 
       {onSponsorClick && (
-        <button className="sponsor-cta" onClick={() => onSponsorClick(null)}>
+        <button
+          style={{
+            width: '100%',
+            marginTop: '20px',
+            padding: '14px 24px',
+            background: '#36bbae',
+            color: 'white',
+            fontSize: '1rem',
+            fontWeight: 600,
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+          }}
+          onClick={() => onSponsorClick(null)}
+        >
           Sponsor a Mile
         </button>
       )}
