@@ -1,0 +1,149 @@
+{
+  "name": "Sponsor a Mile - Neon Fundraise Sync",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": null,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "hook": {
+              "label": "Neon Fundraise Donation Webhook"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook:gateway-webhook",
+            "label": "Webhook",
+            "required": true
+          },
+          {
+            "name": "maxResults",
+            "type": "number",
+            "label": "Maximum number of results"
+          }
+        ],
+        "expect": [
+          {
+            "name": "email",
+            "type": "text",
+            "label": "Donor Email"
+          },
+          {
+            "name": "amount",
+            "type": "number",
+            "label": "Donation Amount"
+          },
+          {
+            "name": "transaction_id",
+            "type": "text",
+            "label": "Transaction ID"
+          },
+          {
+            "name": "runner_id",
+            "type": "number",
+            "label": "Runner ID (optional)"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {},
+      "mapper": {
+        "url": "https://sponsor-a-mile.vercel.app/api/webhooks/donation",
+        "method": "post",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "qs": [],
+        "bodyType": "raw",
+        "parseResponse": true,
+        "contentType": "application/json",
+        "data": "{\n  \"sponsor_email\": \"{{1.email}}\",\n  \"amount\": {{1.amount}},\n  \"transaction_id\": \"{{1.transaction_id}}\",\n  \"runner_id\": {{1.runner_id}}\n}",
+        "timeout": "",
+        "useMtls": false,
+        "authUser": "",
+        "authPass": "",
+        "followRedirect": true,
+        "useQuerystring": false,
+        "gzip": true,
+        "rejectUnauthorized": true,
+        "followAllRedirects": false
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        },
+        "restore": {
+          "expect": {
+            "method": {
+              "label": "POST"
+            },
+            "contentType": {
+              "label": "JSON (application/json)"
+            },
+            "headers": {
+              "items": [
+                null
+              ]
+            }
+          }
+        },
+        "parameters": [],
+        "expect": [
+          {
+            "name": "url",
+            "type": "url",
+            "label": "URL",
+            "required": true
+          },
+          {
+            "name": "method",
+            "type": "select",
+            "label": "Method",
+            "required": true,
+            "validate": {
+              "enum": ["get", "head", "post", "put", "patch", "delete", "options"]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    }
+  }
+}
