@@ -26,6 +26,7 @@ export async function GET(request, { params }) {
         goal_amount: parseFloat(runner.goal_amount),
         price_per_mile: parseFloat(runner.price_per_mile),
         total_miles: parseFloat(runner.total_miles),
+        mile_increment: parseFloat(runner.mile_increment) || 1,
         slug: runner.slug,
         donation_url: runner.donation_url
       },

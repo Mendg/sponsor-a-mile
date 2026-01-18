@@ -92,6 +92,7 @@ export default function RunnerPage({ params }) {
           <div className="tracker-column">
             <MileTracker
               totalMiles={runner.total_miles}
+              mileIncrement={runner.mile_increment}
               sponsorships={sponsorships}
               pricePerMile={runner.price_per_mile}
               onSponsorClick={handleSponsorClick}
@@ -163,6 +164,7 @@ export default function RunnerPage({ params }) {
         }}
         runnerId={runner.id}
         totalMiles={runner.total_miles}
+        mileIncrement={runner.mile_increment}
         sponsorships={sponsorships}
         pricePerMile={runner.price_per_mile}
         selectedMile={selectedMile}

@@ -401,6 +401,7 @@ export default function AdminPage() {
     photo_url: '',
     race_type: 'half',
     custom_miles: '',
+    mile_increment: '1',
     price_per_mile: '36',
   });
 
@@ -501,6 +502,7 @@ export default function AdminPage() {
         body: JSON.stringify({
           ...formData,
           total_miles: totalMiles,
+          mile_increment: parseFloat(formData.mile_increment) || 1,
           price_per_mile: parseFloat(formData.price_per_mile),
         }),
       });
@@ -795,13 +797,33 @@ export default function AdminPage() {
                 </div>
 
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Price per Mile ($)</label>
+                  <label style={styles.label}>Sponsorship Increment</label>
+                  <select
+                    style={styles.select}
+                    value={formData.mile_increment}
+                    onChange={(e) => setFormData({ ...formData, mile_increment: e.target.value })}
+                  >
+                    <option value="1">Every 1 mile (standard for marathons)</option>
+                    <option value="0.5">Every 0.5 miles</option>
+                    <option value="0.25">Every 0.25 miles</option>
+                    <option value="0.1">Every 0.1 miles (27 slots for 2.7 mi)</option>
+                  </select>
+                  <p style={styles.helpText}>
+                    For short races, use smaller increments to offer more sponsorship slots
+                  </p>
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Price per Slot ($)</label>
                   <input
                     type="number"
                     style={styles.input}
                     value={formData.price_per_mile}
                     onChange={(e) => setFormData({ ...formData, price_per_mile: e.target.value })}
                   />
+                  <p style={styles.helpText}>
+                    Price for each sponsorship slot
+                  </p>
                 </div>
 
                 <button

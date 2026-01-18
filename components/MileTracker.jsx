@@ -6,6 +6,7 @@ import { generateMileNumbers, isFeaturedMile, formatMile } from '@/lib/utils';
 
 export default function MileTracker({
   totalMiles = 26.2,
+  mileIncrement = 1,
   sponsorships = [],
   onSponsorClick,
   pricePerMile = 36
@@ -13,7 +14,7 @@ export default function MileTracker({
   const [hoveredMile, setHoveredMile] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-  const miles = useMemo(() => generateMileNumbers(totalMiles), [totalMiles]);
+  const miles = useMemo(() => generateMileNumbers(totalMiles, mileIncrement), [totalMiles, mileIncrement]);
 
   const sponsorshipMap = useMemo(() => {
     const map = new Map();
@@ -61,7 +62,7 @@ export default function MileTracker({
           {miles.map((mile) => {
             const sponsorship = sponsorshipMap.get(mile);
             const isSponsored = !!sponsorship;
-            const { featured, label } = isFeaturedMile(mile, totalMiles);
+            const { featured, label } = isFeaturedMile(mile, totalMiles, mileIncrement);
 
             return (
               <div

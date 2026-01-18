@@ -34,6 +34,7 @@ export async function POST(request) {
       donation_url,
       photo_url,
       total_miles = 26.2,
+      mile_increment = 1,
       price_per_mile = 36,
       goal_amount
     } = body;
@@ -64,12 +65,13 @@ export async function POST(request) {
       counter++;
     }
 
-    // Calculate goal if not provided
-    const calculatedGoal = goal_amount || (parseFloat(total_miles) * parseFloat(price_per_mile));
+    // Calculate number of sponsorship slots and goal
+    const numSlots = Math.ceil(parseFloat(total_miles) / parseFloat(mile_increment));
+    const calculatedGoal = goal_amount || (numSlots * parseFloat(price_per_mile));
 
     const result = await sql`
-      INSERT INTO runners (name, event_name, event_date, donation_url, photo_url, total_miles, price_per_mile, goal_amount, slug)
-      VALUES (${name}, ${event_name}, ${event_date || null}, ${donation_url || null}, ${photo_url || null}, ${total_miles}, ${price_per_mile}, ${calculatedGoal}, ${slug})
+      INSERT INTO runners (name, event_name, event_date, donation_url, photo_url, total_miles, mile_increment, price_per_mile, goal_amount, slug)
+      VALUES (${name}, ${event_name}, ${event_date || null}, ${donation_url || null}, ${photo_url || null}, ${total_miles}, ${mile_increment}, ${price_per_mile}, ${calculatedGoal}, ${slug})
       RETURNING *
     `;
 
@@ -89,7 +91,7 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     const body = await request.json();
-    const { id, name, event_name, event_date, donation_url, photo_url, total_miles, price_per_mile, goal_amount } = body;
+    const { id, name, event_name, event_date, donation_url, photo_url, total_miles, mile_increment, price_per_mile, goal_amount } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Runner ID is required' }, { status: 400 });
@@ -105,6 +107,7 @@ export async function PUT(request) {
         donation_url = COALESCE(${donation_url}, donation_url),
         photo_url = COALESCE(${photo_url}, photo_url),
         total_miles = COALESCE(${total_miles}, total_miles),
+        mile_increment = COALESCE(${mile_increment}, mile_increment),
         price_per_mile = COALESCE(${price_per_mile}, price_per_mile),
         goal_amount = COALESCE(${goal_amount}, goal_amount),
         updated_at = NOW()

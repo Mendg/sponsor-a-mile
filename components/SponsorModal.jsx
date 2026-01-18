@@ -347,6 +347,7 @@ export default function SponsorModal({
   onClose,
   runnerId,
   totalMiles = 26.2,
+  mileIncrement = 1,
   sponsorships = [],
   pricePerMile = 36,
   selectedMile = null,
@@ -369,7 +370,7 @@ export default function SponsorModal({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const miles = useMemo(() => generateMileNumbers(totalMiles), [totalMiles]);
+  const miles = useMemo(() => generateMileNumbers(totalMiles, mileIncrement), [totalMiles, mileIncrement]);
 
   const sponsoredMiles = useMemo(() => {
     return new Set(sponsorships.map(s => parseFloat(s.mile_number)));
@@ -465,7 +466,7 @@ export default function SponsorModal({
             {miles.map((mile) => {
               const isSponsored = sponsoredMiles.has(mile);
               const isSelected = currentMile === mile;
-              const { featured, label } = isFeaturedMile(mile, totalMiles);
+              const { featured, label } = isFeaturedMile(mile, totalMiles, mileIncrement);
 
               const optionStyle = {
                 ...rs(styles.mileOption, styles.mileOptionDesktop),

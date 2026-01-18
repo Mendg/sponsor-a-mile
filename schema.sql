@@ -8,19 +8,25 @@ CREATE TABLE runners (
   event_name VARCHAR(255),
   event_date DATE,
   photo_url TEXT,
+  donation_url TEXT,
   goal_amount DECIMAL(10,2) DEFAULT 943.20,
   price_per_mile DECIMAL(10,2) DEFAULT 36.00,
   slug VARCHAR(100) UNIQUE NOT NULL,
-  total_miles DECIMAL(4,1) DEFAULT 26.2,
+  total_miles DECIMAL(5,2) DEFAULT 26.2,
+  mile_increment DECIMAL(4,2) DEFAULT 1.00,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Migration: Add mile_increment column if upgrading existing DB
+-- ALTER TABLE runners ADD COLUMN IF NOT EXISTS mile_increment DECIMAL(4,2) DEFAULT 1.00;
+-- ALTER TABLE runners ADD COLUMN IF NOT EXISTS donation_url TEXT;
 
 -- Mile sponsorships table
 CREATE TABLE mile_sponsorships (
   id SERIAL PRIMARY KEY,
   runner_id INTEGER REFERENCES runners(id) ON DELETE CASCADE,
-  mile_number DECIMAL(3,1) NOT NULL,
+  mile_number DECIMAL(5,2) NOT NULL,
   sponsor_name VARCHAR(255),
   sponsor_email VARCHAR(255),
   dedication TEXT,
