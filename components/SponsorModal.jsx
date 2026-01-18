@@ -128,6 +128,10 @@ const styles = {
     color: '#1b365d',
     marginBottom: '6px',
   },
+  required: {
+    color: '#ef4444',
+    marginLeft: '2px',
+  },
   input: {
     width: '100%',
     padding: '10px 12px',
@@ -135,6 +139,14 @@ const styles = {
     borderRadius: '8px',
     fontSize: '0.95rem',
     boxSizing: 'border-box',
+  },
+  inputError: {
+    borderColor: '#ef4444',
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: '0.8rem',
+    marginTop: '4px',
   },
   checkboxGroup: {
     display: 'flex',
@@ -183,11 +195,22 @@ const styles = {
     background: '#e5e7eb',
     cursor: 'not-allowed',
   },
+  loadingSpinner: {
+    display: 'inline-block',
+    width: '16px',
+    height: '16px',
+    border: '2px solid white',
+    borderTopColor: 'transparent',
+    borderRadius: '50%',
+    animation: 'spin 0.8s linear infinite',
+    marginRight: '8px',
+  },
 };
 
 export default function SponsorModal({
   isOpen,
   onClose,
+  runnerId,
   totalMiles = 26.2,
   sponsorships = [],
   pricePerMile = 36,
@@ -198,7 +221,10 @@ export default function SponsorModal({
   const [internalSelectedMile, setInternalSelectedMile] = useState(selectedMile);
   const [dedication, setDedication] = useState('');
   const [sponsorName, setSponsorName] = useState('');
+  const [sponsorEmail, setSponsorEmail] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const miles = useMemo(() => generateMileNumbers(totalMiles), [totalMiles]);
 
@@ -211,26 +237,70 @@ export default function SponsorModal({
   const handleMileSelect = (mile) => {
     if (sponsoredMiles.has(mile)) return;
     setInternalSelectedMile(mile);
+    setError('');
     if (onSelectMile) onSelectMile(mile);
   };
 
-  const handleProceed = () => {
+  const validateEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const handleProceed = async () => {
     if (!currentMile) return;
 
-    const params = new URLSearchParams({
-      mile: currentMile.toString(),
-      amount: pricePerMile.toString(),
-      dedication: dedication,
-      name: isAnonymous ? 'Anonymous' : sponsorName
-    });
+    // Validate email
+    if (!sponsorEmail.trim()) {
+      setError('Email is required to complete your sponsorship');
+      return;
+    }
+    if (!validateEmail(sponsorEmail)) {
+      setError('Please enter a valid email address');
+      return;
+    }
 
-    window.location.href = `${donationUrl}?${params.toString()}`;
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // Save pending selection
+      const response = await fetch('/api/pending', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          runner_id: runnerId,
+          mile_number: currentMile,
+          sponsor_name: isAnonymous ? 'Anonymous' : sponsorName,
+          sponsor_email: sponsorEmail.trim().toLowerCase(),
+          dedication: dedication || null,
+          amount: pricePerMile,
+          is_anonymous: isAnonymous
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to save your selection. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Success - redirect to donation page
+      window.location.href = donationUrl;
+
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
 
+  const canProceed = currentMile && sponsorEmail.trim() && !isLoading;
+
   return (
     <div style={styles.overlay} onClick={onClose}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <div style={styles.content} onClick={(e) => e.stopPropagation()}>
         <button style={styles.closeBtn} onClick={onClose} aria-label="Close">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -281,6 +351,24 @@ export default function SponsorModal({
             </div>
 
             <div style={styles.formGroup}>
+              <label style={styles.label} htmlFor="sponsorEmail">
+                Your Email<span style={styles.required}>*</span>
+              </label>
+              <input
+                type="email"
+                id="sponsorEmail"
+                style={{...styles.input, ...(error && !sponsorEmail ? styles.inputError : {})}}
+                value={sponsorEmail}
+                onChange={(e) => { setSponsorEmail(e.target.value); setError(''); }}
+                placeholder="email@example.com"
+                required
+              />
+              <span style={{...styles.charCount, color: '#6b7280'}}>
+                Use the same email you'll use for payment
+              </span>
+            </div>
+
+            <div style={styles.formGroup}>
               <label style={styles.label} htmlFor="sponsorName">Your Name</label>
               <input
                 type="text"
@@ -318,19 +406,24 @@ export default function SponsorModal({
               />
               <span style={styles.charCount}>{dedication.length}/200</span>
             </div>
+
+            {error && (
+              <div style={styles.errorText}>{error}</div>
+            )}
           </div>
         )}
 
         <div style={styles.actions}>
-          <button style={styles.btnSecondary} onClick={onClose}>
+          <button style={styles.btnSecondary} onClick={onClose} disabled={isLoading}>
             Cancel
           </button>
           <button
-            style={{...styles.btnPrimary, ...(!currentMile ? styles.btnPrimaryDisabled : {})}}
+            style={{...styles.btnPrimary, ...(!canProceed ? styles.btnPrimaryDisabled : {})}}
             onClick={handleProceed}
-            disabled={!currentMile}
+            disabled={!canProceed}
           >
-            Continue to Payment - {formatCurrency(pricePerMile)}
+            {isLoading && <span style={styles.loadingSpinner}></span>}
+            {isLoading ? 'Saving...' : `Continue to Payment - ${formatCurrency(pricePerMile)}`}
           </button>
         </div>
       </div>

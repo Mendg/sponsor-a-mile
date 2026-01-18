@@ -161,11 +161,12 @@ export default function RunnerPage({ params }) {
           setShowModal(false);
           setSelectedMile(null);
         }}
+        runnerId={runner.id}
         totalMiles={runner.total_miles}
         sponsorships={sponsorships}
         pricePerMile={runner.price_per_mile}
         selectedMile={selectedMile}
-        donationUrl={`/donate/${slug}`}
+        donationUrl={runner.donation_url || 'https://teamfriendship.org/beaches'}
       />
 
       <style jsx>{`

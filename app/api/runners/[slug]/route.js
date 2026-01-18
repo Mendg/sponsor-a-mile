@@ -26,7 +26,8 @@ export async function GET(request, { params }) {
         goal_amount: parseFloat(runner.goal_amount),
         price_per_mile: parseFloat(runner.price_per_mile),
         total_miles: parseFloat(runner.total_miles),
-        slug: runner.slug
+        slug: runner.slug,
+        donation_url: runner.donation_url
       },
       sponsorships: runner.sponsorships.map(s => ({
         id: s.id,
