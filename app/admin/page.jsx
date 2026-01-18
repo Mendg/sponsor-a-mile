@@ -400,6 +400,7 @@ export default function AdminPage() {
     donation_url: '',
     photo_url: '',
     race_type: 'half',
+    custom_miles: '',
     price_per_mile: '36',
   });
 
@@ -484,7 +485,14 @@ export default function AdminPage() {
     setSubmitting(true);
     setMessage({ type: '', text: '' });
 
-    const totalMiles = formData.race_type === 'half' ? 13.1 : 26.2;
+    let totalMiles;
+    if (formData.race_type === 'half') {
+      totalMiles = 13.1;
+    } else if (formData.race_type === 'full') {
+      totalMiles = 26.2;
+    } else {
+      totalMiles = parseFloat(formData.custom_miles) || 13.1;
+    }
 
     try {
       const response = await fetch('/api/admin/runners', {
@@ -693,7 +701,7 @@ export default function AdminPage() {
                 </div>
 
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Race Type</label>
+                  <label style={styles.label}>Race Distance</label>
                   <div style={styles.raceTypeButtons}>
                     <button
                       type="button"
@@ -701,10 +709,10 @@ export default function AdminPage() {
                         ...styles.raceTypeButton,
                         ...(formData.race_type === 'half' ? styles.raceTypeButtonActive : {}),
                       }}
-                      onClick={() => setFormData({ ...formData, race_type: 'half' })}
+                      onClick={() => setFormData({ ...formData, race_type: 'half', custom_miles: '' })}
                     >
-                      <span style={styles.raceTypeLabel}>Half Marathon</span>
-                      <span style={styles.raceTypeMiles}>13.1 miles</span>
+                      <span style={styles.raceTypeLabel}>Half</span>
+                      <span style={styles.raceTypeMiles}>13.1 mi</span>
                     </button>
                     <button
                       type="button"
@@ -712,12 +720,40 @@ export default function AdminPage() {
                         ...styles.raceTypeButton,
                         ...(formData.race_type === 'full' ? styles.raceTypeButtonActive : {}),
                       }}
-                      onClick={() => setFormData({ ...formData, race_type: 'full' })}
+                      onClick={() => setFormData({ ...formData, race_type: 'full', custom_miles: '' })}
                     >
-                      <span style={styles.raceTypeLabel}>Full Marathon</span>
-                      <span style={styles.raceTypeMiles}>26.2 miles</span>
+                      <span style={styles.raceTypeLabel}>Full</span>
+                      <span style={styles.raceTypeMiles}>26.2 mi</span>
+                    </button>
+                    <button
+                      type="button"
+                      style={{
+                        ...styles.raceTypeButton,
+                        ...(formData.race_type === 'custom' ? styles.raceTypeButtonActive : {}),
+                      }}
+                      onClick={() => setFormData({ ...formData, race_type: 'custom' })}
+                    >
+                      <span style={styles.raceTypeLabel}>Custom</span>
+                      <span style={styles.raceTypeMiles}>Any distance</span>
                     </button>
                   </div>
+                  {formData.race_type === 'custom' && (
+                    <div style={{ marginTop: '12px' }}>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        style={styles.input}
+                        value={formData.custom_miles}
+                        onChange={(e) => setFormData({ ...formData, custom_miles: e.target.value })}
+                        placeholder="Enter distance in miles (e.g., 3.1 for 5K)"
+                        required={formData.race_type === 'custom'}
+                      />
+                      <p style={styles.helpText}>
+                        Common: 5K = 3.1 mi, 10K = 6.2 mi, 15K = 9.3 mi
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div style={styles.formGroup}>
@@ -866,7 +902,12 @@ export default function AdminPage() {
               <ul style={styles.runnerList}>
                 {runners.map((runner) => {
                   const miles = parseFloat(runner.total_miles);
-                  const isHalf = miles <= 14;
+                  // Determine badge color based on distance
+                  const getBadgeStyle = (m) => {
+                    if (m <= 6.5) return { background: '#dcfce7', color: '#166534' }; // Green for short
+                    if (m <= 14) return styles.badgeHalf; // Blue for half
+                    return styles.badgeFull; // Yellow for full+
+                  };
                   return (
                     <li key={runner.id} style={styles.runnerItem}>
                       <div style={styles.runnerInfo}>
@@ -874,9 +915,9 @@ export default function AdminPage() {
                           {runner.name}
                           <span style={{
                             ...styles.badge,
-                            ...(isHalf ? styles.badgeHalf : styles.badgeFull),
+                            ...getBadgeStyle(miles),
                           }}>
-                            {isHalf ? '13.1' : '26.2'}
+                            {miles} mi
                           </span>
                         </div>
                         <div style={styles.runnerEvent}>{runner.event_name}</div>
