@@ -172,12 +172,19 @@ export default function RunnerPage({ params }) {
       <style jsx>{`
         .page-container {
           min-height: 100vh;
+          min-height: -webkit-fill-available;
         }
 
         .tracker-column {
           display: flex;
           flex-direction: column;
-          gap: 24px;
+          gap: 16px;
+        }
+
+        @media (min-width: 768px) {
+          .tracker-column {
+            gap: 24px;
+          }
         }
 
         .share-section {
@@ -185,15 +192,29 @@ export default function RunnerPage({ params }) {
         }
 
         .share-section h3 {
-          font-size: 1.1rem;
-          margin-bottom: 8px;
+          font-size: 1rem;
+          margin-bottom: 6px;
           color: var(--fc-navy);
         }
 
+        @media (min-width: 768px) {
+          .share-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+          }
+        }
+
         .share-section p {
-          font-size: 0.9rem;
+          font-size: 0.85rem;
           color: #6b7280;
-          margin-bottom: 16px;
+          margin-bottom: 12px;
+        }
+
+        @media (min-width: 768px) {
+          .share-section p {
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+          }
         }
 
         .sponsorship-select select {
@@ -201,9 +222,16 @@ export default function RunnerPage({ params }) {
           padding: 12px;
           border: 2px solid var(--fc-gray);
           border-radius: 8px;
-          font-size: 0.95rem;
+          font-size: 16px; /* Prevents iOS zoom */
           background: white;
           cursor: pointer;
+          -webkit-appearance: none;
+        }
+
+        @media (min-width: 768px) {
+          .sponsorship-select select {
+            font-size: 0.95rem;
+          }
         }
 
         .sponsorship-select select:focus {
@@ -216,39 +244,71 @@ export default function RunnerPage({ params }) {
           inset: 0;
           background: rgba(27, 54, 93, 0.7);
           display: flex;
-          align-items: center;
+          align-items: flex-end;
           justify-content: center;
           z-index: 1000;
-          padding: 20px;
+          padding: 0;
+        }
+
+        @media (min-width: 640px) {
+          .card-modal-overlay {
+            align-items: center;
+            padding: 20px;
+          }
         }
 
         .card-modal {
           background: white;
-          border-radius: 16px;
-          padding: 32px;
-          max-width: 500px;
+          border-radius: 20px 20px 0 0;
+          padding: 20px 16px;
+          padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+          max-width: 100%;
           width: 100%;
-          max-height: 90vh;
+          max-height: 95vh;
           overflow-y: auto;
           position: relative;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        @media (min-width: 640px) {
+          .card-modal {
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            max-height: 90vh;
+          }
         }
 
         .modal-close-btn {
           position: absolute;
-          top: 16px;
-          right: 16px;
-          background: none;
+          top: 12px;
+          right: 12px;
+          background: #f3f4f6;
           border: none;
           color: #6b7280;
           font-size: 0.9rem;
           cursor: pointer;
+          padding: 8px 16px;
+          border-radius: 20px;
+          min-height: 44px;
+          display: flex;
+          align-items: center;
+        }
+
+        @media (min-width: 640px) {
+          .modal-close-btn {
+            background: none;
+            padding: 4px;
+            min-height: auto;
+          }
         }
 
         .modal-close-btn:hover {
           color: var(--fc-navy);
         }
 
-        @media (max-width: 1024px) {
+        /* On mobile, show leaderboard first (runner info) */
+        @media (max-width: 1023px) {
           .leaderboard-column {
             order: -1;
           }
@@ -270,7 +330,17 @@ function Header() {
         .page-header {
           background: var(--fc-navy);
           color: white;
-          padding: 20px 0;
+          padding: 14px 0;
+          position: sticky;
+          top: 0;
+          z-index: 100;
+        }
+
+        @media (min-width: 768px) {
+          .page-header {
+            padding: 20px 0;
+            position: static;
+          }
         }
 
         .page-header .container {
@@ -280,14 +350,27 @@ function Header() {
         }
 
         .logo {
-          font-size: 1.1rem;
+          font-size: 0.9rem;
           font-weight: 700;
-          letter-spacing: 2px;
+          letter-spacing: 1.5px;
+        }
+
+        @media (min-width: 768px) {
+          .logo {
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+          }
         }
 
         .bh {
-          font-size: 0.75rem;
+          font-size: 0.7rem;
           opacity: 0.6;
+        }
+
+        @media (min-width: 768px) {
+          .bh {
+            font-size: 0.75rem;
+          }
         }
       `}</style>
     </header>

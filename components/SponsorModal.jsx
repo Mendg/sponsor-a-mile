@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { generateMileNumbers, isFeaturedMile, formatMile, formatCurrency } from '@/lib/utils';
 
 const styles = {
@@ -9,54 +9,97 @@ const styles = {
     inset: 0,
     background: 'rgba(27, 54, 93, 0.6)',
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-end', // Mobile: slide up from bottom
     justifyContent: 'center',
-    padding: '20px',
+    padding: '0',
     zIndex: 1000,
+  },
+  overlayDesktop: {
+    alignItems: 'center',
+    padding: '20px',
   },
   content: {
     background: 'white',
-    borderRadius: '16px',
+    borderRadius: '20px 20px 0 0', // Mobile: rounded top corners
     width: '100%',
+    maxWidth: '100%',
+    maxHeight: '95vh',
+    overflowY: 'auto',
+    padding: '20px 16px',
+    paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+    position: 'relative',
+    WebkitOverflowScrolling: 'touch',
+  },
+  contentDesktop: {
+    borderRadius: '16px',
     maxWidth: '560px',
     maxHeight: '90vh',
-    overflowY: 'auto',
     padding: '32px',
-    position: 'relative',
   },
   closeBtn: {
     position: 'absolute',
-    top: '16px',
-    right: '16px',
-    background: 'none',
+    top: '12px',
+    right: '12px',
+    background: '#f3f4f6',
     border: 'none',
     color: '#6b7280',
     cursor: 'pointer',
+    padding: '8px',
+    borderRadius: '50%',
+    minWidth: '44px',
+    minHeight: '44px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeBtnDesktop: {
+    background: 'none',
     padding: '4px',
+    minWidth: 'auto',
+    minHeight: 'auto',
   },
   title: {
-    fontSize: '1.5rem',
+    fontSize: '1.25rem',
     fontWeight: 700,
     color: '#1b365d',
+    margin: '0 0 6px 0',
+    paddingRight: '48px', // Space for close button
+  },
+  titleDesktop: {
+    fontSize: '1.5rem',
     margin: '0 0 8px 0',
   },
   subtitle: {
     color: '#6b7280',
+    margin: '0 0 16px 0',
+    fontSize: '0.9rem',
+  },
+  subtitleDesktop: {
     margin: '0 0 24px 0',
+    fontSize: '1rem',
   },
   gridContainer: {
-    maxHeight: '240px',
+    maxHeight: '200px',
     overflowY: 'auto',
-    marginBottom: '24px',
+    marginBottom: '16px',
     padding: '4px',
+    WebkitOverflowScrolling: 'touch',
+  },
+  gridContainerDesktop: {
+    maxHeight: '240px',
+    marginBottom: '24px',
   },
   grid: {
     display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(54px, 1fr))',
+    gap: '6px',
+  },
+  gridDesktop: {
     gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))',
     gap: '8px',
   },
   mileOption: {
-    padding: '12px 8px',
+    padding: '10px 6px',
     border: '2px solid #e5e7eb',
     borderRadius: '8px',
     background: 'white',
@@ -66,6 +109,12 @@ const styles = {
     alignItems: 'center',
     gap: '2px',
     position: 'relative',
+    minHeight: '48px',
+    WebkitTapHighlightColor: 'transparent',
+    touchAction: 'manipulation',
+  },
+  mileOptionDesktop: {
+    padding: '12px 8px',
   },
   mileOptionSponsored: {
     background: '#f3f4f6',
@@ -83,28 +132,42 @@ const styles = {
   },
   mileNum: {
     fontWeight: 600,
-    fontSize: '0.95rem',
+    fontSize: '0.9rem',
     color: '#1b365d',
   },
+  mileNumDesktop: {
+    fontSize: '0.95rem',
+  },
   mileFeatLabel: {
-    fontSize: '0.6rem',
+    fontSize: '0.55rem',
     textTransform: 'uppercase',
     color: '#6b7280',
+  },
+  mileFeatLabelDesktop: {
+    fontSize: '0.6rem',
   },
   takenBadge: {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    fontSize: '0.65rem',
+    fontSize: '0.6rem',
     background: '#36bbae',
     color: 'white',
-    padding: '2px 6px',
+    padding: '2px 5px',
     borderRadius: '4px',
     textTransform: 'uppercase',
   },
+  takenBadgeDesktop: {
+    fontSize: '0.65rem',
+    padding: '2px 6px',
+  },
   dedicationForm: {
     borderTop: '1px solid #e5e7eb',
+    paddingTop: '16px',
+    marginBottom: '16px',
+  },
+  dedicationFormDesktop: {
     paddingTop: '20px',
     marginBottom: '24px',
   },
@@ -112,20 +175,32 @@ const styles = {
     display: 'inline-block',
     background: '#36bbae',
     color: 'white',
-    padding: '6px 12px',
+    padding: '5px 10px',
     borderRadius: '20px',
-    fontSize: '0.85rem',
+    fontSize: '0.8rem',
     fontWeight: 600,
+    marginBottom: '14px',
+  },
+  selectedBadgeDesktop: {
+    padding: '6px 12px',
+    fontSize: '0.85rem',
     marginBottom: '16px',
   },
   formGroup: {
+    marginBottom: '14px',
+  },
+  formGroupDesktop: {
     marginBottom: '16px',
   },
   label: {
     display: 'block',
-    fontSize: '0.9rem',
+    fontSize: '0.85rem',
     fontWeight: 500,
     color: '#1b365d',
+    marginBottom: '5px',
+  },
+  labelDesktop: {
+    fontSize: '0.9rem',
     marginBottom: '6px',
   },
   required: {
@@ -134,11 +209,16 @@ const styles = {
   },
   input: {
     width: '100%',
-    padding: '10px 12px',
+    padding: '12px',
     border: '2px solid #e5e7eb',
     borderRadius: '8px',
-    fontSize: '0.95rem',
+    fontSize: '16px', // Prevents iOS zoom
     boxSizing: 'border-box',
+    WebkitAppearance: 'none',
+  },
+  inputDesktop: {
+    padding: '10px 12px',
+    fontSize: '0.95rem',
   },
   inputError: {
     borderColor: '#ef4444',
@@ -151,13 +231,22 @@ const styles = {
   checkboxGroup: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '10px',
     cursor: 'pointer',
+    minHeight: '44px', // Touch-friendly
+  },
+  checkboxGroupDesktop: {
+    gap: '8px',
+    minHeight: 'auto',
   },
   checkbox: {
+    width: '22px',
+    height: '22px',
+    accentColor: '#36bbae',
+  },
+  checkboxDesktop: {
     width: '18px',
     height: '18px',
-    accentColor: '#36bbae',
   },
   charCount: {
     display: 'block',
@@ -168,11 +257,16 @@ const styles = {
   },
   actions: {
     display: 'flex',
+    flexDirection: 'column-reverse', // Mobile: primary button first visually
+    gap: '10px',
+  },
+  actionsDesktop: {
+    flexDirection: 'row',
     gap: '12px',
     justifyContent: 'flex-end',
   },
   btnSecondary: {
-    padding: '12px 24px',
+    padding: '14px 24px',
     borderRadius: '8px',
     fontSize: '0.95rem',
     fontWeight: 600,
@@ -180,9 +274,16 @@ const styles = {
     background: 'white',
     border: '2px solid #e5e7eb',
     color: '#6b7280',
+    minHeight: '48px',
+    width: '100%',
+  },
+  btnSecondaryDesktop: {
+    padding: '12px 24px',
+    minHeight: 'auto',
+    width: 'auto',
   },
   btnPrimary: {
-    padding: '12px 24px',
+    padding: '14px 24px',
     borderRadius: '8px',
     fontSize: '0.95rem',
     fontWeight: 600,
@@ -190,6 +291,13 @@ const styles = {
     background: '#36bbae',
     border: 'none',
     color: 'white',
+    minHeight: '48px',
+    width: '100%',
+  },
+  btnPrimaryDesktop: {
+    padding: '12px 24px',
+    minHeight: 'auto',
+    width: 'auto',
   },
   btnPrimaryDisabled: {
     background: '#e5e7eb',
@@ -225,6 +333,14 @@ export default function SponsorModal({
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const miles = useMemo(() => generateMileNumbers(totalMiles), [totalMiles]);
 
@@ -298,31 +414,34 @@ export default function SponsorModal({
 
   const canProceed = currentMile && sponsorEmail.trim() && !isLoading;
 
+  // Responsive style helper
+  const rs = (base, desktop) => isMobile ? base : { ...base, ...desktop };
+
   return (
-    <div style={styles.overlay} onClick={onClose}>
+    <div style={rs(styles.overlay, styles.overlayDesktop)} onClick={onClose}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      <div style={styles.content} onClick={(e) => e.stopPropagation()}>
-        <button style={styles.closeBtn} onClick={onClose} aria-label="Close">
+      <div style={rs(styles.content, styles.contentDesktop)} onClick={(e) => e.stopPropagation()}>
+        <button style={rs(styles.closeBtn, styles.closeBtnDesktop)} onClick={onClose} aria-label="Close">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
 
-        <h2 style={styles.title}>Sponsor a Mile</h2>
-        <p style={styles.subtitle}>
+        <h2 style={rs(styles.title, styles.titleDesktop)}>Sponsor a Mile</h2>
+        <p style={rs(styles.subtitle, styles.subtitleDesktop)}>
           Choose a mile to sponsor for {formatCurrency(pricePerMile)}
         </p>
 
-        <div style={styles.gridContainer}>
-          <div style={styles.grid}>
+        <div style={rs(styles.gridContainer, styles.gridContainerDesktop)}>
+          <div style={rs(styles.grid, styles.gridDesktop)}>
             {miles.map((mile) => {
               const isSponsored = sponsoredMiles.has(mile);
               const isSelected = currentMile === mile;
               const { featured, label } = isFeaturedMile(mile, totalMiles);
 
               const optionStyle = {
-                ...styles.mileOption,
+                ...rs(styles.mileOption, styles.mileOptionDesktop),
                 ...(isSponsored ? styles.mileOptionSponsored : {}),
                 ...(isSelected && !isSponsored ? styles.mileOptionSelected : {}),
                 ...(featured && !isSponsored ? styles.mileOptionFeatured : {}),
@@ -335,9 +454,9 @@ export default function SponsorModal({
                   onClick={() => handleMileSelect(mile)}
                   disabled={isSponsored}
                 >
-                  <span style={styles.mileNum}>{formatMile(mile)}</span>
-                  {featured && <span style={styles.mileFeatLabel}>{label}</span>}
-                  {isSponsored && <span style={styles.takenBadge}>Taken</span>}
+                  <span style={rs(styles.mileNum, styles.mileNumDesktop)}>{formatMile(mile)}</span>
+                  {featured && <span style={rs(styles.mileFeatLabel, styles.mileFeatLabelDesktop)}>{label}</span>}
+                  {isSponsored && <span style={rs(styles.takenBadge, styles.takenBadgeDesktop)}>Taken</span>}
                 </button>
               );
             })}
@@ -345,19 +464,19 @@ export default function SponsorModal({
         </div>
 
         {currentMile && (
-          <div style={styles.dedicationForm}>
-            <div style={styles.selectedBadge}>
+          <div style={rs(styles.dedicationForm, styles.dedicationFormDesktop)}>
+            <div style={rs(styles.selectedBadge, styles.selectedBadgeDesktop)}>
               Mile {formatMile(currentMile)} selected
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label} htmlFor="sponsorEmail">
+            <div style={rs(styles.formGroup, styles.formGroupDesktop)}>
+              <label style={rs(styles.label, styles.labelDesktop)} htmlFor="sponsorEmail">
                 Your Email<span style={styles.required}>*</span>
               </label>
               <input
                 type="email"
                 id="sponsorEmail"
-                style={{...styles.input, ...(error && !sponsorEmail ? styles.inputError : {})}}
+                style={{...rs(styles.input, styles.inputDesktop), ...(error && !sponsorEmail ? styles.inputError : {})}}
                 value={sponsorEmail}
                 onChange={(e) => { setSponsorEmail(e.target.value); setError(''); }}
                 placeholder="email@example.com"
@@ -368,12 +487,12 @@ export default function SponsorModal({
               </span>
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label} htmlFor="sponsorName">Your Name</label>
+            <div style={rs(styles.formGroup, styles.formGroupDesktop)}>
+              <label style={rs(styles.label, styles.labelDesktop)} htmlFor="sponsorName">Your Name</label>
               <input
                 type="text"
                 id="sponsorName"
-                style={{...styles.input, ...(isAnonymous ? {background: '#f3f4f6', color: '#9ca3af'} : {})}}
+                style={{...rs(styles.input, styles.inputDesktop), ...(isAnonymous ? {background: '#f3f4f6', color: '#9ca3af'} : {})}}
                 value={sponsorName}
                 onChange={(e) => setSponsorName(e.target.value)}
                 placeholder="How should we display your name?"
@@ -381,11 +500,11 @@ export default function SponsorModal({
               />
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.checkboxGroup}>
+            <div style={rs(styles.formGroup, styles.formGroupDesktop)}>
+              <label style={rs(styles.checkboxGroup, styles.checkboxGroupDesktop)}>
                 <input
                   type="checkbox"
-                  style={styles.checkbox}
+                  style={rs(styles.checkbox, styles.checkboxDesktop)}
                   checked={isAnonymous}
                   onChange={(e) => setIsAnonymous(e.target.checked)}
                 />
@@ -393,11 +512,11 @@ export default function SponsorModal({
               </label>
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label} htmlFor="dedication">Dedication Message (optional)</label>
+            <div style={rs(styles.formGroup, styles.formGroupDesktop)}>
+              <label style={rs(styles.label, styles.labelDesktop)} htmlFor="dedication">Dedication Message (optional)</label>
               <textarea
                 id="dedication"
-                style={{...styles.input, resize: 'vertical'}}
+                style={{...rs(styles.input, styles.inputDesktop), resize: 'vertical'}}
                 value={dedication}
                 onChange={(e) => setDedication(e.target.value)}
                 placeholder="In honor of... / In memory of... / Running for..."
@@ -413,12 +532,12 @@ export default function SponsorModal({
           </div>
         )}
 
-        <div style={styles.actions}>
-          <button style={styles.btnSecondary} onClick={onClose} disabled={isLoading}>
+        <div style={rs(styles.actions, styles.actionsDesktop)}>
+          <button style={rs(styles.btnSecondary, styles.btnSecondaryDesktop)} onClick={onClose} disabled={isLoading}>
             Cancel
           </button>
           <button
-            style={{...styles.btnPrimary, ...(!canProceed ? styles.btnPrimaryDisabled : {})}}
+            style={{...rs(styles.btnPrimary, styles.btnPrimaryDesktop), ...(!canProceed ? styles.btnPrimaryDisabled : {})}}
             onClick={handleProceed}
             disabled={!canProceed}
           >
