@@ -3,13 +3,14 @@ import '@/styles/globals.css';
 export const metadata = {
   title: 'Sponsor a Mile - Team Friendship',
   description: 'Support runners by sponsoring miles for Team Friendship marathon events',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover',
-  },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }) {
