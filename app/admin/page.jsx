@@ -300,12 +300,92 @@ const styles = {
     background: '#fef3c7',
     color: '#92400e',
   },
+  pendingSection: {
+    marginTop: '32px',
+  },
+  pendingCard: {
+    background: 'white',
+    borderRadius: '16px',
+    padding: '24px',
+    boxShadow: '0 4px 20px rgba(27, 54, 93, 0.1)',
+  },
+  pendingHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '16px',
+  },
+  pendingCount: {
+    background: '#fef3c7',
+    color: '#92400e',
+    padding: '4px 12px',
+    borderRadius: '20px',
+    fontSize: '0.85rem',
+    fontWeight: 600,
+  },
+  pendingList: {
+    display: 'grid',
+    gap: '12px',
+  },
+  pendingItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '16px',
+    background: '#fffbeb',
+    borderRadius: '12px',
+    border: '1px solid #fef3c7',
+  },
+  pendingInfo: {
+    flex: 1,
+  },
+  pendingMile: {
+    fontWeight: 700,
+    color: '#1b365d',
+    fontSize: '1.1rem',
+  },
+  pendingDetails: {
+    fontSize: '0.9rem',
+    color: '#6b7280',
+    marginTop: '4px',
+  },
+  pendingRunner: {
+    fontSize: '0.85rem',
+    color: '#9ca3af',
+    marginTop: '2px',
+  },
+  pendingActions: {
+    display: 'flex',
+    gap: '8px',
+  },
+  confirmButton: {
+    padding: '8px 16px',
+    borderRadius: '8px',
+    fontSize: '0.85rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+    border: 'none',
+    background: '#36bbae',
+    color: 'white',
+  },
+  rejectButton: {
+    padding: '8px 16px',
+    borderRadius: '8px',
+    fontSize: '0.85rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+    border: '1px solid #e5e7eb',
+    background: 'white',
+    color: '#6b7280',
+  },
 };
 
 export default function AdminPage() {
   const [runners, setRunners] = useState([]);
+  const [pending, setPending] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [confirmingId, setConfirmingId] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [activeTab, setActiveTab] = useState('single');
   const [csvData, setCsvData] = useState(null);
@@ -325,6 +405,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     fetchRunners();
+    fetchPending();
   }, []);
 
   const fetchRunners = async () => {
@@ -337,6 +418,65 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchPending = async () => {
+    try {
+      const response = await fetch('/api/admin/pending');
+      const data = await response.json();
+      setPending(data.pending || []);
+    } catch (error) {
+      console.error('Error fetching pending:', error);
+    }
+  };
+
+  const confirmSponsorship = async (pendingId) => {
+    setConfirmingId(pendingId);
+    try {
+      const response = await fetch('/api/admin/pending', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pending_id: pendingId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to confirm');
+      }
+
+      setMessage({ type: 'success', text: data.message });
+      fetchPending();
+      fetchRunners();
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message });
+    } finally {
+      setConfirmingId(null);
+    }
+  };
+
+  const rejectSponsorship = async (pendingId) => {
+    if (!confirm('Remove this pending sponsorship?')) return;
+
+    try {
+      await fetch(`/api/admin/pending?id=${pendingId}`, { method: 'DELETE' });
+      fetchPending();
+      setMessage({ type: 'success', text: 'Pending sponsorship removed' });
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to remove' });
+    }
+  };
+
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${Math.floor(diffHours / 24)}d ago`;
   };
 
   const handleSubmit = async (e) => {
@@ -772,6 +912,60 @@ export default function AdminPage() {
             )}
           </div>
         </div>
+
+        {/* Pending Sponsorships Section */}
+        {pending.length > 0 && (
+          <div style={styles.pendingSection}>
+            <div style={styles.pendingCard}>
+              <div style={styles.pendingHeader}>
+                <h2 style={styles.cardTitle}>Pending Sponsorships</h2>
+                <span style={styles.pendingCount}>{pending.length} awaiting payment</span>
+              </div>
+
+              <p style={{ color: '#6b7280', marginBottom: '16px', fontSize: '0.9rem' }}>
+                These sponsors selected miles but haven't completed payment yet.
+                Click "Confirm" after verifying payment in Neon Fundraise.
+              </p>
+
+              <div style={styles.pendingList}>
+                {pending.map((p) => (
+                  <div key={p.id} style={styles.pendingItem}>
+                    <div style={styles.pendingInfo}>
+                      <div style={styles.pendingMile}>
+                        Mile {parseFloat(p.mile_number)} - ${parseFloat(p.amount)}
+                      </div>
+                      <div style={styles.pendingDetails}>
+                        {p.sponsor_name} ({p.sponsor_email})
+                        {p.dedication && <span> - "{p.dedication}"</span>}
+                      </div>
+                      <div style={styles.pendingRunner}>
+                        {p.runner_name} • {formatTimeAgo(p.created_at)}
+                      </div>
+                    </div>
+                    <div style={styles.pendingActions}>
+                      <button
+                        style={styles.rejectButton}
+                        onClick={() => rejectSponsorship(p.id)}
+                      >
+                        Remove
+                      </button>
+                      <button
+                        style={{
+                          ...styles.confirmButton,
+                          ...(confirmingId === p.id ? { opacity: 0.6, cursor: 'wait' } : {}),
+                        }}
+                        onClick={() => confirmSponsorship(p.id)}
+                        disabled={confirmingId === p.id}
+                      >
+                        {confirmingId === p.id ? 'Confirming...' : 'Confirm Payment'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
