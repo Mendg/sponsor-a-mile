@@ -361,25 +361,6 @@ export default function SponsorModal({
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  // Convert Neon Fundraise member page URL to direct donate URL
-  const getDirectDonateUrl = (url) => {
-    if (!url || url === '#') return url;
-
-    // If already a donate URL, use as-is
-    if (url.toLowerCase().includes('/donate')) return url;
-
-    // Remove trailing slash
-    let cleanUrl = url.replace(/\/$/, '');
-
-    // Append /Donate for Neon Fundraise URLs
-    // Works for both /Member/MyPage/123 and personal URLs like /beaches/levi-groner
-    if (cleanUrl.includes('teamfriendship.org') || cleanUrl.includes('rallybound')) {
-      return `${cleanUrl}/Donate`;
-    }
-
-    return url;
-  };
-
   const handleProceed = async () => {
     if (!currentMile) return;
 
@@ -420,8 +401,8 @@ export default function SponsorModal({
         return;
       }
 
-      // Success - redirect directly to donation form (not profile page)
-      window.location.href = getDirectDonateUrl(donationUrl);
+      // Success - redirect to runner's donation page
+      window.location.href = donationUrl;
 
     } catch (err) {
       setError('Something went wrong. Please try again.');
