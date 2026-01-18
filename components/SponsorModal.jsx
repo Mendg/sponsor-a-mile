@@ -313,6 +313,33 @@ const styles = {
     animation: 'spin 0.8s linear infinite',
     marginRight: '8px',
   },
+  infoBox: {
+    display: 'flex',
+    gap: '12px',
+    padding: '14px',
+    background: '#eff6ff',
+    borderRadius: '10px',
+    marginTop: '8px',
+    border: '1px solid #bfdbfe',
+  },
+  infoIcon: {
+    flexShrink: 0,
+    width: '22px',
+    height: '22px',
+    borderRadius: '50%',
+    background: '#3b82f6',
+    color: 'white',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '0.8rem',
+    fontWeight: 700,
+  },
+  infoText: {
+    fontSize: '0.85rem',
+    lineHeight: 1.5,
+    color: '#1e40af',
+  },
 };
 
 export default function SponsorModal({
@@ -529,6 +556,16 @@ export default function SponsorModal({
             {error && (
               <div style={styles.errorText}>{error}</div>
             )}
+
+            {/* Instructions */}
+            <div style={styles.infoBox}>
+              <div style={styles.infoIcon}>i</div>
+              <div style={styles.infoText}>
+                <strong>How it works:</strong> After you complete your donation on the next page,
+                your sponsored mile will appear on this page within 24 hours.
+                We'll match your donation using the email address above.
+              </div>
+            </div>
           </div>
         )}
 
