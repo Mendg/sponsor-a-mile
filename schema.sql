@@ -5,6 +5,7 @@
 CREATE TABLE runners (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
+  email VARCHAR(255),
   event_name VARCHAR(255),
   event_date DATE,
   photo_url TEXT,
@@ -18,9 +19,10 @@ CREATE TABLE runners (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Migration: Add mile_increment column if upgrading existing DB
+-- Migration: Add columns if upgrading existing DB
 -- ALTER TABLE runners ADD COLUMN IF NOT EXISTS mile_increment DECIMAL(4,2) DEFAULT 1.00;
 -- ALTER TABLE runners ADD COLUMN IF NOT EXISTS donation_url TEXT;
+-- ALTER TABLE runners ADD COLUMN IF NOT EXISTS email VARCHAR(255);
 
 -- Mile sponsorships table
 CREATE TABLE mile_sponsorships (

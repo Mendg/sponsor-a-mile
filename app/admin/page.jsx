@@ -639,6 +639,29 @@ export default function AdminPage() {
     setTimeout(() => setMessage({ type: '', text: '' }), 2000);
   };
 
+  const exportURLs = () => {
+    const baseUrl = window.location.origin;
+    const csvContent = [
+      ['name', 'email', 'event_name', 'url', 'total_miles', 'price_per_mile'].join(','),
+      ...runners.map(r => [
+        `"${r.name}"`,
+        `"${r.email || ''}"`,
+        `"${r.event_name}"`,
+        `"${baseUrl}/runner/${r.slug}"`,
+        r.total_miles,
+        r.price_per_mile
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'runners-urls.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const downloadTemplate = () => {
     const template = 'name,donation_url,race_type,event_name,event_date\nJohn Smith,https://teamfriendship.org/runner/john,half,Team Friendship: The Beaches,2026-01-30\nJane Doe,https://teamfriendship.org/runner/jane,full,Team Friendship: The Beaches,2026-01-30';
     const blob = new Blob([template], { type: 'text/csv' });
@@ -905,14 +928,33 @@ export default function AdminPage() {
 
           {/* Runner List */}
           <div style={styles.card}>
-            <h2 style={styles.cardTitle}>
-              Existing Runners
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 style={{ ...styles.cardTitle, marginBottom: 0 }}>
+                Existing Runners
+                {runners.length > 0 && (
+                  <span style={{ fontWeight: 400, color: '#6b7280', fontSize: '0.9rem' }}>
+                    {' '}({runners.length})
+                  </span>
+                )}
+              </h2>
               {runners.length > 0 && (
-                <span style={{ fontWeight: 400, color: '#6b7280', fontSize: '0.9rem' }}>
-                  {' '}({runners.length})
-                </span>
+                <button
+                  onClick={exportURLs}
+                  style={{
+                    padding: '8px 16px',
+                    background: '#1b365d',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Export URLs
+                </button>
               )}
-            </h2>
+            </div>
 
             {loading ? (
               <p>Loading...</p>

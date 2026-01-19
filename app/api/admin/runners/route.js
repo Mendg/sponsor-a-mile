@@ -29,6 +29,7 @@ export async function POST(request) {
     const body = await request.json();
     const {
       name,
+      email,
       event_name,
       event_date,
       donation_url,
@@ -70,8 +71,8 @@ export async function POST(request) {
     const calculatedGoal = goal_amount || (numSlots * parseFloat(price_per_mile));
 
     const result = await sql`
-      INSERT INTO runners (name, event_name, event_date, donation_url, photo_url, total_miles, mile_increment, price_per_mile, goal_amount, slug)
-      VALUES (${name}, ${event_name}, ${event_date || null}, ${donation_url || null}, ${photo_url || null}, ${total_miles}, ${mile_increment}, ${price_per_mile}, ${calculatedGoal}, ${slug})
+      INSERT INTO runners (name, email, event_name, event_date, donation_url, photo_url, total_miles, mile_increment, price_per_mile, goal_amount, slug)
+      VALUES (${name}, ${email || null}, ${event_name}, ${event_date || null}, ${donation_url || null}, ${photo_url || null}, ${total_miles}, ${mile_increment}, ${price_per_mile}, ${calculatedGoal}, ${slug})
       RETURNING *
     `;
 
