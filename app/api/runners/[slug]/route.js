@@ -43,8 +43,8 @@ export async function GET(request, { params }) {
         sponsored_count: stats.sponsoredCount,
         total_raised: stats.totalRaised,
         total_miles: parseFloat(runner.total_miles),
-        goal_amount: parseFloat(runner.goal_amount),
-        progress_percent: Math.min(100, (stats.totalRaised / parseFloat(runner.goal_amount)) * 100)
+        goal_amount: parseFloat(runner.goal_amount) || (Math.ceil(parseFloat(runner.total_miles) / (parseFloat(runner.mile_increment) || 1)) * parseFloat(runner.price_per_mile)),
+        progress_percent: Math.min(100, (stats.totalRaised / (parseFloat(runner.goal_amount) || (Math.ceil(parseFloat(runner.total_miles) / (parseFloat(runner.mile_increment) || 1)) * parseFloat(runner.price_per_mile)))) * 100)
       }
     });
   } catch (error) {
