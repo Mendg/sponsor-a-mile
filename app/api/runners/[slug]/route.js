@@ -1,21 +1,41 @@
 import { NextResponse } from 'next/server';
-import { getRunnerBySlug, getRunnerStats } from '@/lib/db';
+import { neon } from '@neondatabase/serverless';
 
 export const dynamic = 'force-dynamic';
 export async function GET(request, { params }) {
   try {
     const { slug } = params;
+    const sql = neon(process.env.DATABASE_URL);
 
-    const runner = await getRunnerBySlug(slug);
-
-    if (!runner) {
+    // Get runner
+    const runners = await sql`SELECT * FROM runners WHERE slug = ${slug}`;
+    if (runners.length === 0) {
       return NextResponse.json(
         { error: 'Runner not found' },
         { status: 404 }
       );
     }
+    const runner = runners[0];
 
-    const stats = await getRunnerStats(runner.id);
+    // Get sponsorships directly
+    const sponsorships = await sql`
+      SELECT * FROM mile_sponsorships
+      WHERE runner_id = ${runner.id}
+      ORDER BY mile_number ASC
+    `;
+
+    // Get stats
+    const statsResult = await sql`
+      SELECT
+        COUNT(*) as sponsored_count,
+        COALESCE(SUM(amount), 0) as total_raised
+      FROM mile_sponsorships
+      WHERE runner_id = ${runner.id}
+    `;
+    const stats = {
+      sponsoredCount: parseInt(statsResult[0].sponsored_count),
+      totalRaised: parseFloat(statsResult[0].total_raised)
+    };
 
     return NextResponse.json({
       runner: {
@@ -31,10 +51,10 @@ export async function GET(request, { params }) {
         slug: runner.slug,
         donation_url: runner.donation_url
       },
-      sponsorships: runner.sponsorships.map(s => ({
+      sponsorships: sponsorships.map(s => ({
         id: s.id,
         mile_number: parseFloat(s.mile_number),
-        sponsor_name: s.sponsor_name,
+        sponsor_name: s.is_anonymous ? 'Anonymous' : s.sponsor_name,
         dedication: s.dedication,
         amount: parseFloat(s.amount),
         is_anonymous: s.is_anonymous,
