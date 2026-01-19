@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getRunnerBySlug, getRunnerStats } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
 export async function GET(request, { params }) {
   try {
     const { slug } = params;
@@ -55,3 +56,4 @@ export async function GET(request, { params }) {
     );
   }
 }
+
