@@ -190,14 +190,14 @@ export default function MileTracker({
           padding: 4px 0;
         }
 
-        /* Mobile: Grid layout for easier tapping */
+        /* Grid layout - works for all screen sizes */
         .mile-track {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
           gap: 6px;
         }
 
-        /* For many miles (30+), use smaller grid on mobile */
+        /* Mobile: Scrollable container */
         @media (max-width: 767px) {
           .mile-track-container {
             max-height: 320px;
@@ -209,21 +209,26 @@ export default function MileTracker({
           }
         }
 
-        /* Desktop: Horizontal scroll */
+        /* Tablet and Desktop: Larger grid cells, more space */
         @media (min-width: 768px) {
           .mile-track-container {
-            overflow-x: auto;
-            padding: 8px 0;
-            margin: 0 -8px;
-            max-height: none;
-            border: none;
+            padding: 8px;
+            border: 1px solid var(--fc-gray);
+            border-radius: 12px;
+            max-height: 400px;
+            overflow-y: auto;
           }
 
           .mile-track {
-            display: flex;
-            gap: 6px;
-            min-width: fit-content;
-            padding: 0 8px;
+            grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+            gap: 8px;
+          }
+        }
+
+        /* Large desktop: Even more columns */
+        @media (min-width: 1200px) {
+          .mile-track {
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
           }
         }
 
