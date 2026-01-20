@@ -3,6 +3,19 @@
 import { useRef, useState } from 'react';
 
 export default function GraphicsPage() {
+  // Editable global settings
+  const [settings, setSettings] = useState({
+    runnerName: 'Levi',
+    eventName: 'Miami Marathon',
+    pricePerMile: 36,
+    totalMiles: 26.2,
+    pageUrl: 'sponsor-a-mile.vercel.app',
+  });
+
+  const updateSetting = (key, value) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
   return (
     <div className="graphics-page">
       <header className="page-header">
@@ -14,31 +27,111 @@ export default function GraphicsPage() {
 
       <main className="container">
         <h1>Promotional Graphics</h1>
-        <p className="intro">Download and share these graphics to promote Sponsor a Mile</p>
+        <p className="intro">Customize and download graphics to promote Sponsor a Mile</p>
+
+        {/* Global Settings */}
+        <div className="settings-panel">
+          <h2>Customize All Graphics</h2>
+          <div className="settings-grid">
+            <div className="setting">
+              <label>Runner Name</label>
+              <input
+                type="text"
+                value={settings.runnerName}
+                onChange={(e) => updateSetting('runnerName', e.target.value)}
+              />
+            </div>
+            <div className="setting">
+              <label>Event Name</label>
+              <input
+                type="text"
+                value={settings.eventName}
+                onChange={(e) => updateSetting('eventName', e.target.value)}
+              />
+            </div>
+            <div className="setting">
+              <label>Price Per Mile ($)</label>
+              <input
+                type="number"
+                value={settings.pricePerMile}
+                onChange={(e) => updateSetting('pricePerMile', parseInt(e.target.value) || 0)}
+              />
+            </div>
+            <div className="setting">
+              <label>Total Miles</label>
+              <input
+                type="number"
+                step="0.1"
+                value={settings.totalMiles}
+                onChange={(e) => updateSetting('totalMiles', parseFloat(e.target.value) || 0)}
+              />
+            </div>
+            <div className="setting">
+              <label>Page URL</label>
+              <input
+                type="text"
+                value={settings.pageUrl}
+                onChange={(e) => updateSetting('pageUrl', e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
 
         <div className="graphics-grid">
           <GraphicCard title="Main Explainer" description="What is Dedicate a Mile?">
-            <DedicateMileExplainer />
+            <DedicateMileExplainer settings={settings} />
           </GraphicCard>
 
           <GraphicCard title="How It Works" description="3-step process">
-            <HowItWorksGraphic />
+            <HowItWorksGraphic settings={settings} />
           </GraphicCard>
 
           <GraphicCard title="Social Share - Square" description="Perfect for Instagram">
-            <SocialSquare />
+            <SocialSquare settings={settings} />
           </GraphicCard>
 
           <GraphicCard title="Story Format" description="For Instagram/Facebook Stories">
-            <StoryGraphic />
+            <StoryGraphic settings={settings} />
           </GraphicCard>
 
           <GraphicCard title="Mile Meaning" description="Every mile tells a story">
-            <MileMeaningGraphic />
+            <MileMeaningGraphic settings={settings} />
           </GraphicCard>
 
           <GraphicCard title="Impact Card" description="Show the difference">
-            <ImpactGraphic />
+            <ImpactGraphic settings={settings} />
+          </GraphicCard>
+
+          <GraphicCard title="Personal Ask" description="Runner's personal invitation">
+            <PersonalAskGraphic settings={settings} />
+          </GraphicCard>
+
+          <GraphicCard title="Dedication Example" description="Show what a dedication looks like">
+            <DedicationExampleGraphic settings={settings} />
+          </GraphicCard>
+
+          <GraphicCard title="Pick Your Mile" description="Story: Own the moment">
+            <PickYourMileStory settings={settings} />
+          </GraphicCard>
+
+          <GraphicCard title="Mile Grid" description="Story: Visual mile tracker">
+            <MileGridStory settings={settings} />
+          </GraphicCard>
+
+          <GraphicCard title="Finish Line Open" description="Story: Sponsor the final mile">
+            <FinishLineStory settings={settings} />
+          </GraphicCard>
+
+          <GraphicCard title="Miles Going Fast" description="Story: Create urgency">
+            <MilesGoingFastStory settings={settings} />
+          </GraphicCard>
+
+          <GraphicCard title="Extra Mile" description="Story: Punny ask">
+            <ExtraMileStory settings={settings} />
+          </GraphicCard>
+
+          <GraphicCard title="Per Mile Ask" description="Story: Direct sponsorship ask">
+            <PerMileStory settings={settings} />
           </GraphicCard>
         </div>
       </main>
@@ -89,7 +182,47 @@ export default function GraphicsPage() {
 
         .intro {
           color: #6b7280;
+          margin-bottom: 32px;
+        }
+
+        .settings-panel {
+          background: white;
+          padding: 24px;
+          border-radius: 12px;
           margin-bottom: 40px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .settings-panel h2 {
+          color: var(--fc-navy);
+          font-size: 1.1rem;
+          margin-bottom: 16px;
+        }
+
+        .settings-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 16px;
+        }
+
+        .setting label {
+          display: block;
+          font-size: 0.8rem;
+          color: #6b7280;
+          margin-bottom: 4px;
+        }
+
+        .setting input {
+          width: 100%;
+          padding: 10px 12px;
+          border: 2px solid var(--fc-gray);
+          border-radius: 8px;
+          font-size: 0.95rem;
+        }
+
+        .setting input:focus {
+          outline: none;
+          border-color: var(--fc-teal);
         }
 
         .graphics-grid {
@@ -100,6 +233,10 @@ export default function GraphicsPage() {
 
         @media (max-width: 480px) {
           .graphics-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .settings-grid {
             grid-template-columns: 1fr;
           }
         }
@@ -117,7 +254,6 @@ function GraphicCard({ title, description, children }) {
     setDownloading(true);
 
     try {
-      // Dynamic import for html2canvas
       const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(cardRef.current, {
         scale: 2,
@@ -212,9 +348,10 @@ function GraphicCard({ title, description, children }) {
 }
 
 // Main Explainer Graphic
-function DedicateMileExplainer() {
+function DedicateMileExplainer({ settings }) {
   return (
     <div className="explainer">
+      <div className="bh">B"H</div>
       <div className="header-section">
         <div className="small-text">TEAM FRIENDSHIP PRESENTS</div>
         <h2>Dedicate a Mile</h2>
@@ -229,7 +366,7 @@ function DedicateMileExplainer() {
             </div>
           ))}
           <div className="dots">...</div>
-          <div className="mile finish">26.2</div>
+          <div className="mile finish">{settings.totalMiles}</div>
         </div>
       </div>
 
@@ -251,6 +388,15 @@ function DedicateMileExplainer() {
           padding: 40px 32px;
           border-radius: 16px;
           text-align: center;
+          position: relative;
+        }
+
+        .bh {
+          position: absolute;
+          top: 12px;
+          right: 16px;
+          font-size: 0.7rem;
+          opacity: 0.5;
         }
 
         .header-section {
@@ -350,9 +496,10 @@ function DedicateMileExplainer() {
 }
 
 // How It Works Graphic
-function HowItWorksGraphic() {
+function HowItWorksGraphic({ settings }) {
   return (
     <div className="how-it-works">
+      <div className="bh">B"H</div>
       <h2>How It Works</h2>
 
       <div className="steps">
@@ -360,7 +507,7 @@ function HowItWorksGraphic() {
           <div className="icon">1</div>
           <div className="content">
             <h3>Pick Your Mile</h3>
-            <p>Choose from 26.2 available miles</p>
+            <p>Choose from {settings.totalMiles} available miles</p>
           </div>
         </div>
 
@@ -386,7 +533,7 @@ function HowItWorksGraphic() {
       </div>
 
       <div className="footer-text">
-        sponsor-a-mile.vercel.app
+        {settings.pageUrl}
       </div>
 
       <style jsx>{`
@@ -396,6 +543,16 @@ function HowItWorksGraphic() {
           padding: 40px 32px;
           border-radius: 16px;
           border: 3px solid var(--fc-navy);
+          position: relative;
+        }
+
+        .bh {
+          position: absolute;
+          top: 12px;
+          right: 16px;
+          font-size: 0.7rem;
+          color: var(--fc-navy);
+          opacity: 0.5;
         }
 
         h2 {
@@ -463,14 +620,15 @@ function HowItWorksGraphic() {
 }
 
 // Social Square Graphic (Instagram)
-function SocialSquare() {
+function SocialSquare({ settings }) {
   return (
     <div className="social-square">
+      <div className="bh">B"H</div>
       <div className="content">
         <div className="top-text">TEAM FRIENDSHIP</div>
         <h2>Sponsor<br/>a Mile</h2>
         <div className="divider" />
-        <p>Dedicate a mile of my marathon to someone you love</p>
+        <p>Dedicate a mile of {settings.runnerName}'s {settings.eventName} to someone you love</p>
         <div className="mile-icons">
           <span className="mile active">1</span>
           <span className="mile active">2</span>
@@ -478,7 +636,7 @@ function SocialSquare() {
           <span className="mile">4</span>
           <span className="mile">5</span>
         </div>
-        <p className="small">$36 per mile</p>
+        <p className="small">${settings.pricePerMile} per mile</p>
       </div>
 
       <style jsx>{`
@@ -492,6 +650,15 @@ function SocialSquare() {
           align-items: center;
           justify-content: center;
           text-align: center;
+          position: relative;
+        }
+
+        .bh {
+          position: absolute;
+          top: 12px;
+          right: 16px;
+          font-size: 0.7rem;
+          opacity: 0.5;
         }
 
         .content {
@@ -560,9 +727,10 @@ function SocialSquare() {
 }
 
 // Story Format Graphic
-function StoryGraphic() {
+function StoryGraphic({ settings }) {
   return (
     <div className="story">
+      <div className="bh">B"H</div>
       <div className="top-section">
         <div className="brand">TEAM FRIENDSHIP</div>
       </div>
@@ -580,8 +748,8 @@ function StoryGraphic() {
 
       <div className="bottom-section">
         <div className="cta">
-          <p>Sponsor a mile of my marathon</p>
-          <p className="link">Link in bio</p>
+          <p>Sponsor a mile of {settings.runnerName}'s race</p>
+          <p className="link">${settings.pricePerMile}/mile</p>
         </div>
       </div>
 
@@ -595,6 +763,15 @@ function StoryGraphic() {
           display: flex;
           flex-direction: column;
           overflow: hidden;
+          position: relative;
+        }
+
+        .bh {
+          position: absolute;
+          top: 12px;
+          right: 16px;
+          font-size: 0.6rem;
+          opacity: 0.5;
         }
 
         .top-section {
@@ -687,9 +864,10 @@ function StoryGraphic() {
 }
 
 // Mile Meaning Graphic
-function MileMeaningGraphic() {
+function MileMeaningGraphic({ settings }) {
   return (
     <div className="mile-meaning">
+      <div className="bh">B"H</div>
       <h2>Every Mile<br/>Tells a Story</h2>
 
       <div className="examples">
@@ -706,14 +884,14 @@ function MileMeaningGraphic() {
           <p>"Chai - for life!"</p>
         </div>
         <div className="example">
-          <span className="mile">26.2</span>
+          <span className="mile">{settings.totalMiles}</span>
           <p>"Finish line dedication"</p>
         </div>
       </div>
 
       <div className="bottom">
         <p>What will YOUR mile say?</p>
-        <span className="brand">Sponsor a Mile</span>
+        <span className="brand">Sponsor a Mile • ${settings.pricePerMile}</span>
       </div>
 
       <style jsx>{`
@@ -724,6 +902,16 @@ function MileMeaningGraphic() {
           padding: 40px 32px;
           border-radius: 16px;
           text-align: center;
+          position: relative;
+        }
+
+        .bh {
+          position: absolute;
+          top: 12px;
+          right: 16px;
+          font-size: 0.7rem;
+          color: var(--fc-navy);
+          opacity: 0.5;
         }
 
         h2 {
@@ -788,20 +976,21 @@ function MileMeaningGraphic() {
 }
 
 // Impact Graphic
-function ImpactGraphic() {
+function ImpactGraphic({ settings }) {
   return (
     <div className="impact">
+      <div className="bh">B"H</div>
       <div className="header">
         <h2>Your Mile<br/>Makes a Difference</h2>
       </div>
 
       <div className="stats">
         <div className="stat">
-          <span className="number">$36</span>
+          <span className="number">${settings.pricePerMile}</span>
           <span className="label">Per Mile</span>
         </div>
         <div className="stat">
-          <span className="number">26.2</span>
+          <span className="number">{settings.totalMiles}</span>
           <span className="label">Miles Available</span>
         </div>
       </div>
@@ -824,6 +1013,15 @@ function ImpactGraphic() {
           padding: 40px 32px;
           border-radius: 16px;
           text-align: center;
+          position: relative;
+        }
+
+        .bh {
+          position: absolute;
+          top: 12px;
+          right: 16px;
+          font-size: 0.7rem;
+          opacity: 0.5;
         }
 
         .header {
@@ -888,6 +1086,891 @@ function ImpactGraphic() {
           border-radius: 8px;
           font-weight: 700;
           font-size: 1rem;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// Personal Ask Graphic - NEW
+function PersonalAskGraphic({ settings }) {
+  return (
+    <div className="personal-ask">
+      <div className="bh">B"H</div>
+      <div className="header">
+        <div className="avatar">{settings.runnerName.charAt(0)}</div>
+        <h2>Run With Me</h2>
+      </div>
+
+      <div className="message">
+        <p>I'm running the <strong>{settings.eventName}</strong> to support Friendship Circle.</p>
+        <p>Will you sponsor one of my {settings.totalMiles} miles?</p>
+      </div>
+
+      <div className="how">
+        <div className="how-item">
+          <span className="check">✓</span>
+          <span>Pick a mile number</span>
+        </div>
+        <div className="how-item">
+          <span className="check">✓</span>
+          <span>Add a personal dedication</span>
+        </div>
+        <div className="how-item">
+          <span className="check">✓</span>
+          <span>I'll carry your message to the finish</span>
+        </div>
+      </div>
+
+      <div className="cta">
+        <span>${settings.pricePerMile} per mile</span>
+      </div>
+
+      <div className="footer">
+        <span>- {settings.runnerName}</span>
+      </div>
+
+      <style jsx>{`
+        .personal-ask {
+          width: 400px;
+          background: white;
+          padding: 40px 32px;
+          border-radius: 16px;
+          border: 3px solid var(--fc-navy);
+          text-align: center;
+          position: relative;
+        }
+
+        .bh {
+          position: absolute;
+          top: 12px;
+          right: 16px;
+          font-size: 0.7rem;
+          color: var(--fc-navy);
+          opacity: 0.5;
+        }
+
+        .header {
+          margin-bottom: 24px;
+        }
+
+        .avatar {
+          width: 64px;
+          height: 64px;
+          background: var(--fc-navy);
+          color: white;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.8rem;
+          font-weight: 700;
+          margin: 0 auto 16px;
+        }
+
+        h2 {
+          color: var(--fc-navy);
+          font-size: 1.8rem;
+        }
+
+        .message {
+          margin-bottom: 24px;
+        }
+
+        .message p {
+          color: #4b5563;
+          font-size: 1rem;
+          line-height: 1.6;
+          margin-bottom: 8px;
+        }
+
+        .message strong {
+          color: var(--fc-navy);
+        }
+
+        .how {
+          background: var(--fc-gray-light);
+          padding: 20px;
+          border-radius: 12px;
+          margin-bottom: 24px;
+          text-align: left;
+        }
+
+        .how-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 8px 0;
+          color: #4b5563;
+          font-size: 0.95rem;
+        }
+
+        .check {
+          color: var(--fc-teal);
+          font-weight: 700;
+        }
+
+        .cta span {
+          display: inline-block;
+          background: var(--fc-teal);
+          color: white;
+          padding: 14px 32px;
+          border-radius: 8px;
+          font-weight: 700;
+          font-size: 1.1rem;
+        }
+
+        .footer {
+          margin-top: 20px;
+          color: var(--fc-navy);
+          font-style: italic;
+          font-size: 1rem;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// Dedication Example Graphic - NEW
+function DedicationExampleGraphic({ settings }) {
+  return (
+    <div className="dedication-example">
+      <div className="bh">B"H</div>
+      <div className="card-label">MILE DEDICATION</div>
+
+      <div className="mile-badge">Mile 18</div>
+
+      <div className="dedication-content">
+        <p className="dedication-text">"In loving memory of my father, who taught me that every step forward matters"</p>
+        <p className="sponsor">Sponsored by David M.</p>
+      </div>
+
+      <div className="runner-info">
+        <p>Carried by <strong>{settings.runnerName}</strong></p>
+        <p className="event">{settings.eventName}</p>
+      </div>
+
+      <div className="footer">
+        <span className="brand">Sponsor a Mile</span>
+        <span className="price">${settings.pricePerMile}</span>
+      </div>
+
+      <style jsx>{`
+        .dedication-example {
+          width: 350px;
+          background: linear-gradient(135deg, var(--fc-navy) 0%, #2a4a7a 100%);
+          color: white;
+          padding: 40px 28px;
+          border-radius: 16px;
+          text-align: center;
+          position: relative;
+        }
+
+        .bh {
+          position: absolute;
+          top: 12px;
+          right: 16px;
+          font-size: 0.7rem;
+          opacity: 0.5;
+        }
+
+        .card-label {
+          font-size: 0.7rem;
+          letter-spacing: 2px;
+          opacity: 0.6;
+          margin-bottom: 20px;
+        }
+
+        .mile-badge {
+          display: inline-block;
+          background: var(--fc-teal);
+          padding: 12px 28px;
+          border-radius: 30px;
+          font-size: 1.3rem;
+          font-weight: 700;
+          margin-bottom: 24px;
+        }
+
+        .dedication-content {
+          background: rgba(255,255,255,0.1);
+          padding: 24px;
+          border-radius: 12px;
+          margin-bottom: 24px;
+        }
+
+        .dedication-text {
+          font-style: italic;
+          font-size: 1.05rem;
+          line-height: 1.5;
+          margin-bottom: 16px;
+        }
+
+        .sponsor {
+          font-size: 0.9rem;
+          opacity: 0.8;
+        }
+
+        .runner-info {
+          margin-bottom: 24px;
+        }
+
+        .runner-info p {
+          font-size: 0.95rem;
+          margin-bottom: 4px;
+        }
+
+        .runner-info strong {
+          color: var(--fc-teal);
+        }
+
+        .event {
+          opacity: 0.7;
+          font-size: 0.85rem;
+        }
+
+        .footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 20px;
+          border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .brand {
+          font-weight: 600;
+          font-size: 0.9rem;
+        }
+
+        .price {
+          background: rgba(255,255,255,0.15);
+          padding: 6px 14px;
+          border-radius: 20px;
+          font-weight: 600;
+          font-size: 0.85rem;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// Story: Pick Your Mile
+function PickYourMileStory({ settings }) {
+  return (
+    <div className="story-card">
+      <div className="bh">B"H</div>
+      <div className="headline">
+        <div className="blue">PICK YOUR MILE.</div>
+        <div className="white">OWN THE MOMENT.</div>
+      </div>
+      <div className="subtext">SPONSOR MILE 1, MILE 13, OR THE FINISH LINE</div>
+      <div className="emoji">🗺️</div>
+      <div className="cta-section">
+        <div className="cta-main">Choose your mile at</div>
+        <div className="cta-url">{settings.pageUrl}</div>
+      </div>
+      <div className="brand">
+        <div className="brand-icon" />
+        <span className="team">Team</span>Friendship
+      </div>
+
+      <style jsx>{`
+        .story-card {
+          width: 270px;
+          height: 480px;
+          background: linear-gradient(180deg, #1a2744 0%, #0f1729 100%);
+          border-radius: 12px;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 25px 20px;
+          color: white;
+        }
+        .bh {
+          font-size: 10px;
+          color: rgba(255,255,255,0.5);
+          margin-bottom: 15px;
+          letter-spacing: 1px;
+        }
+        .headline {
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 800;
+          font-size: 28px;
+          line-height: 1.05;
+          letter-spacing: 1px;
+          margin-bottom: 8px;
+        }
+        .blue { color: #7dd3fc; }
+        .white { color: white; }
+        .subtext {
+          font-size: 11px;
+          color: rgba(255,255,255,0.8);
+          letter-spacing: 0.5px;
+          margin-bottom: 20px;
+          line-height: 1.4;
+          text-transform: uppercase;
+        }
+        .emoji {
+          font-size: 80px;
+          margin: 15px 0;
+          filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+        }
+        .cta-section {
+          position: absolute;
+          bottom: 60px;
+          text-align: center;
+        }
+        .cta-main {
+          font-weight: 700;
+          font-size: 14px;
+          color: white;
+          margin-bottom: 8px;
+        }
+        .cta-url {
+          font-size: 11px;
+          color: rgba(255,255,255,0.7);
+        }
+        .brand {
+          position: absolute;
+          bottom: 20px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 11px;
+          color: rgba(255,255,255,0.6);
+        }
+        .brand-icon {
+          width: 16px;
+          height: 16px;
+          background: #7dd3fc;
+          border-radius: 50%;
+        }
+        .team {
+          color: white;
+          font-weight: 700;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// Story: Mile Grid Visual
+function MileGridStory({ settings }) {
+  const totalMiles = Math.floor(settings.totalMiles);
+  const sponsoredMiles = [1, 2, 5, 8]; // Example sponsored miles
+
+  return (
+    <div className="story-card">
+      <div className="bh">B"H</div>
+      <div className="headline">
+        <div className="blue">{totalMiles} MILES.</div>
+        <div className="white">WHICH ONE IS YOURS?</div>
+      </div>
+      <div className="subtext">DEDICATE A MILE IN SOMEONE'S HONOR</div>
+      <div className="mile-grid">
+        {Array.from({ length: 12 }, (_, i) => i + 1).map((mile) => (
+          <div
+            key={mile}
+            className={`mile ${sponsoredMiles.includes(mile) ? 'sponsored' : 'available'}`}
+          >
+            {mile}
+          </div>
+        ))}
+      </div>
+      <div className="legend">🟢 Sponsored  ⬜ Available</div>
+      <div className="cta-section">
+        <div className="cta-main">Claim yours at</div>
+        <div className="cta-url">{settings.pageUrl}</div>
+      </div>
+      <div className="brand">
+        <div className="brand-icon" />
+        <span className="team">Team</span>Friendship
+      </div>
+
+      <style jsx>{`
+        .story-card {
+          width: 270px;
+          height: 480px;
+          background: linear-gradient(180deg, #1a2744 0%, #0f1729 100%);
+          border-radius: 12px;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 25px 20px;
+          color: white;
+        }
+        .bh {
+          font-size: 10px;
+          color: rgba(255,255,255,0.5);
+          margin-bottom: 15px;
+          letter-spacing: 1px;
+        }
+        .headline {
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 800;
+          font-size: 28px;
+          line-height: 1.05;
+          margin-bottom: 8px;
+        }
+        .blue { color: #7dd3fc; }
+        .white { color: white; }
+        .subtext {
+          font-size: 11px;
+          color: rgba(255,255,255,0.8);
+          margin-bottom: 15px;
+          text-transform: uppercase;
+        }
+        .mile-grid {
+          display: grid;
+          grid-template-columns: repeat(6, 1fr);
+          gap: 4px;
+          margin: 10px;
+          width: 90%;
+        }
+        .mile {
+          border-radius: 4px;
+          padding: 6px 0;
+          font-size: 10px;
+          font-weight: 600;
+        }
+        .mile.sponsored {
+          background: #36bbae;
+          color: white;
+        }
+        .mile.available {
+          background: #e5e7eb;
+          color: #1b365d;
+        }
+        .legend {
+          font-size: 9px;
+          color: rgba(255,255,255,0.6);
+          margin-top: 5px;
+        }
+        .cta-section {
+          position: absolute;
+          bottom: 60px;
+          text-align: center;
+        }
+        .cta-main {
+          font-weight: 700;
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+        .cta-url {
+          font-size: 11px;
+          color: rgba(255,255,255,0.7);
+        }
+        .brand {
+          position: absolute;
+          bottom: 20px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 11px;
+          color: rgba(255,255,255,0.6);
+        }
+        .brand-icon {
+          width: 16px;
+          height: 16px;
+          background: #7dd3fc;
+          border-radius: 50%;
+        }
+        .team {
+          color: white;
+          font-weight: 700;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// Story: Finish Line Open
+function FinishLineStory({ settings }) {
+  return (
+    <div className="story-card">
+      <div className="bh">B"H</div>
+      <div className="headline">
+        <div className="blue">THE FINISH LINE</div>
+        <div className="white">IS STILL OPEN.</div>
+      </div>
+      <div className="subtext">SPONSOR MILE {settings.totalMiles}<br/>AND CARRY ME HOME</div>
+      <div className="emoji">🏁</div>
+      <div className="cta-section">
+        <div className="cta-main">Claim the finish line at</div>
+        <div className="cta-url">{settings.pageUrl}</div>
+      </div>
+      <div className="brand">
+        <div className="brand-icon" />
+        <span className="team">Team</span>Friendship
+      </div>
+
+      <style jsx>{`
+        .story-card {
+          width: 270px;
+          height: 480px;
+          background: linear-gradient(180deg, #1a2744 0%, #0f1729 100%);
+          border-radius: 12px;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 25px 20px;
+          color: white;
+        }
+        .bh {
+          font-size: 10px;
+          color: rgba(255,255,255,0.5);
+          margin-bottom: 15px;
+          letter-spacing: 1px;
+        }
+        .headline {
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 800;
+          font-size: 28px;
+          line-height: 1.05;
+          margin-bottom: 8px;
+        }
+        .blue { color: #7dd3fc; }
+        .white { color: white; }
+        .subtext {
+          font-size: 11px;
+          color: rgba(255,255,255,0.8);
+          margin-bottom: 20px;
+          text-transform: uppercase;
+          line-height: 1.4;
+        }
+        .emoji {
+          font-size: 80px;
+          margin: 15px 0;
+        }
+        .cta-section {
+          position: absolute;
+          bottom: 60px;
+          text-align: center;
+        }
+        .cta-main {
+          font-weight: 700;
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+        .cta-url {
+          font-size: 11px;
+          color: rgba(255,255,255,0.7);
+        }
+        .brand {
+          position: absolute;
+          bottom: 20px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 11px;
+          color: rgba(255,255,255,0.6);
+        }
+        .brand-icon {
+          width: 16px;
+          height: 16px;
+          background: #7dd3fc;
+          border-radius: 50%;
+        }
+        .team {
+          color: white;
+          font-weight: 700;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// Story: Miles Going Fast
+function MilesGoingFastStory({ settings }) {
+  return (
+    <div className="story-card">
+      <div className="bh">B"H</div>
+      <div className="headline">
+        <div className="blue">MILES ARE</div>
+        <div className="white">GOING FAST.</div>
+      </div>
+      <div className="subtext">18 OF {Math.floor(settings.totalMiles)} ALREADY CLAIMED!</div>
+      <div className="emoji">🔥</div>
+      <div className="cta-section">
+        <div className="cta-main">Grab yours before they're gone</div>
+        <div className="cta-url">{settings.pageUrl}</div>
+      </div>
+      <div className="brand">
+        <div className="brand-icon" />
+        <span className="team">Team</span>Friendship
+      </div>
+
+      <style jsx>{`
+        .story-card {
+          width: 270px;
+          height: 480px;
+          background: linear-gradient(180deg, #1a2744 0%, #0f1729 100%);
+          border-radius: 12px;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 25px 20px;
+          color: white;
+        }
+        .bh {
+          font-size: 10px;
+          color: rgba(255,255,255,0.5);
+          margin-bottom: 15px;
+          letter-spacing: 1px;
+        }
+        .headline {
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 800;
+          font-size: 28px;
+          line-height: 1.05;
+          margin-bottom: 8px;
+        }
+        .blue { color: #7dd3fc; }
+        .white { color: white; }
+        .subtext {
+          font-size: 11px;
+          color: rgba(255,255,255,0.8);
+          margin-bottom: 20px;
+          text-transform: uppercase;
+        }
+        .emoji {
+          font-size: 80px;
+          margin: 15px 0;
+        }
+        .cta-section {
+          position: absolute;
+          bottom: 60px;
+          text-align: center;
+        }
+        .cta-main {
+          font-weight: 700;
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+        .cta-url {
+          font-size: 11px;
+          color: rgba(255,255,255,0.7);
+        }
+        .brand {
+          position: absolute;
+          bottom: 20px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 11px;
+          color: rgba(255,255,255,0.6);
+        }
+        .brand-icon {
+          width: 16px;
+          height: 16px;
+          background: #7dd3fc;
+          border-radius: 50%;
+        }
+        .team {
+          color: white;
+          font-weight: 700;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// Story: Extra Mile
+function ExtraMileStory({ settings }) {
+  return (
+    <div className="story-card">
+      <div className="bh">B"H</div>
+      <div className="headline">
+        <div className="blue">GO THE EXTRA MILE.</div>
+        <div className="white">LITERALLY.</div>
+      </div>
+      <div className="subtext">I'M RUNNING. YOU'RE GIVING.<br/>KIDS ARE WINNING.</div>
+      <div className="emoji">🏃‍♂️</div>
+      <div className="cta-section">
+        <div className="cta-main">Support {settings.runnerName}'s run</div>
+        <div className="cta-url">{settings.pageUrl}</div>
+      </div>
+      <div className="brand">
+        <div className="brand-icon" />
+        <span className="team">Team</span>Friendship
+      </div>
+
+      <style jsx>{`
+        .story-card {
+          width: 270px;
+          height: 480px;
+          background: linear-gradient(180deg, #1a2744 0%, #0f1729 100%);
+          border-radius: 12px;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 25px 20px;
+          color: white;
+        }
+        .bh {
+          font-size: 10px;
+          color: rgba(255,255,255,0.5);
+          margin-bottom: 15px;
+          letter-spacing: 1px;
+        }
+        .headline {
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 800;
+          font-size: 28px;
+          line-height: 1.05;
+          margin-bottom: 8px;
+        }
+        .blue { color: #7dd3fc; }
+        .white { color: white; }
+        .subtext {
+          font-size: 11px;
+          color: rgba(255,255,255,0.8);
+          margin-bottom: 20px;
+          text-transform: uppercase;
+          line-height: 1.4;
+        }
+        .emoji {
+          font-size: 80px;
+          margin: 15px 0;
+        }
+        .cta-section {
+          position: absolute;
+          bottom: 60px;
+          text-align: center;
+        }
+        .cta-main {
+          font-weight: 700;
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+        .cta-url {
+          font-size: 11px;
+          color: rgba(255,255,255,0.7);
+        }
+        .brand {
+          position: absolute;
+          bottom: 20px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 11px;
+          color: rgba(255,255,255,0.6);
+        }
+        .brand-icon {
+          width: 16px;
+          height: 16px;
+          background: #7dd3fc;
+          border-radius: 50%;
+        }
+        .team {
+          color: white;
+          font-weight: 700;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// Story: Per Mile Ask
+function PerMileStory({ settings }) {
+  return (
+    <div className="story-card">
+      <div className="bh">B"H</div>
+      <div className="headline">
+        <div className="blue">SPONSOR A MILE.</div>
+        <div className="white">${settings.pricePerMile} PER MILE.</div>
+      </div>
+      <div className="subtext">I'M RUNNING {settings.totalMiles} OF THEM.</div>
+      <div className="emoji">📍</div>
+      <div className="cta-section">
+        <div className="cta-main">Support {settings.runnerName}'s run</div>
+        <div className="cta-url">{settings.pageUrl}</div>
+      </div>
+      <div className="brand">
+        <div className="brand-icon" />
+        <span className="team">Team</span>Friendship
+      </div>
+
+      <style jsx>{`
+        .story-card {
+          width: 270px;
+          height: 480px;
+          background: linear-gradient(180deg, #1a2744 0%, #0f1729 100%);
+          border-radius: 12px;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 25px 20px;
+          color: white;
+        }
+        .bh {
+          font-size: 10px;
+          color: rgba(255,255,255,0.5);
+          margin-bottom: 15px;
+          letter-spacing: 1px;
+        }
+        .headline {
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 800;
+          font-size: 28px;
+          line-height: 1.05;
+          margin-bottom: 8px;
+        }
+        .blue { color: #7dd3fc; }
+        .white { color: white; }
+        .subtext {
+          font-size: 11px;
+          color: rgba(255,255,255,0.8);
+          margin-bottom: 20px;
+          text-transform: uppercase;
+        }
+        .emoji {
+          font-size: 80px;
+          margin: 15px 0;
+        }
+        .cta-section {
+          position: absolute;
+          bottom: 60px;
+          text-align: center;
+        }
+        .cta-main {
+          font-weight: 700;
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+        .cta-url {
+          font-size: 11px;
+          color: rgba(255,255,255,0.7);
+        }
+        .brand {
+          position: absolute;
+          bottom: 20px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 11px;
+          color: rgba(255,255,255,0.6);
+        }
+        .brand-icon {
+          width: 16px;
+          height: 16px;
+          background: #7dd3fc;
+          border-radius: 50%;
+        }
+        .team {
+          color: white;
+          font-weight: 700;
         }
       `}</style>
     </div>
