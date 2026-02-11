@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { getRunnerByToken, getStreak, checkMilestones, logActivity, getTotalRaised, getTier } from '@/lib/coaching';
+import { getRunnerByToken, getStreak, checkMilestones, logActivity, getTotalRaised, getTier, checkAndAwardStreakFreeze, awardPoints, POINTS_VALUES, recordQuestParticipation } from '@/lib/coaching';
 import { sendSMS, buildMilestoneSMS } from '@/lib/sms';
 
 // POST /api/coaching/complete
@@ -37,6 +37,17 @@ export async function POST(request) {
       detail: easy_mode ? 'Easy mode' : null
     });
 
+    // Award points for completion
+    await awardPoints({
+      runnerId: runner.id,
+      points: POINTS_VALUES.DAILY_COMPLETION,
+      reason: 'daily_completion',
+      details: `Day ${day_number} completed`
+    });
+
+    // Record quest participation
+    await recordQuestParticipation(runner.id, 1);
+
     // Calculate updated streak
     const streak = await getStreak(runner.id);
     const totalRaised = await getTotalRaised(runner.id);
@@ -67,12 +78,24 @@ export async function POST(request) {
       });
     }
 
+    // Check if runner earned a streak freeze
+    const freezeAwarded = await checkAndAwardStreakFreeze(runner.id);
+    if (freezeAwarded && runner.phone) {
+      await sendSMS({
+        to: runner.phone,
+        body: `🧊 Streak Freeze Earned! You completed 7 consecutive days. You now have ${freezeAwarded.freezesAvailable} ${freezeAwarded.freezesAvailable === 1 ? 'freeze' : 'freezes'}. If you miss a day, we'll automatically protect your streak.`,
+        runnerId: runner.id,
+        messageType: 'freeze_earned'
+      });
+    }
+
     return NextResponse.json({
       success: true,
       streak,
       total_raised: totalRaised,
       tier,
-      milestones: milestones.map(m => m.type)
+      milestones: milestones.map(m => m.type),
+      freeze_earned: freezeAwarded !== null
     });
   } catch (error) {
     console.error('Complete action error:', error);

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getRunnerByToken, getStreak, getTier, getNextTier, getTotalRaised, getDaysCompleted, getActivity, getTeamLeaderboard, getDayForDate } from '@/lib/coaching';
+import { getRunnerByToken, getStreak, getTier, getNextTier, getTotalRaised, getDaysCompleted, getActivity, getTeamLeaderboard, getDayForDate, getStreakFreezeStatus, getPoints, getPointMilestone } from '@/lib/coaching';
 import { getRunnerStats } from '@/lib/db';
 
 // GET /api/coaching/runner/[token]
@@ -13,18 +13,21 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const [streak, totalRaised, daysCompleted, activity, leaderboard, mileStats] = await Promise.all([
+    const [streak, totalRaised, daysCompleted, activity, leaderboard, mileStats, freezeStatus, points] = await Promise.all([
       getStreak(runner.id),
       getTotalRaised(runner.id),
       getDaysCompleted(runner.id),
       getActivity(runner.id, 20),
       getTeamLeaderboard(),
-      getRunnerStats(runner.id)
+      getRunnerStats(runner.id),
+      getStreakFreezeStatus(runner.id),
+      getPoints(runner.id)
     ]);
 
     const tier = getTier(totalRaised);
     const nextTier = getNextTier(totalRaised);
     const todayDay = getDayForDate(new Date());
+    const pointMilestone = getPointMilestone(points.lifetime);
 
     // Find this runner's position on leaderboard
     const position = leaderboard.findIndex(r => r.id === runner.id) + 1;
@@ -47,7 +50,14 @@ export async function GET(request, { params }) {
         tier,
         next_tier: nextTier,
         leaderboard_position: position,
-        today_day: todayDay
+        today_day: todayDay,
+        freezes_available: freezeStatus.available,
+        freezes_earned: freezeStatus.earned,
+        freezes_used: freezeStatus.used,
+        points_balance: points.balance,
+        points_lifetime: points.lifetime,
+        points_this_week: points.this_week,
+        point_milestone: pointMilestone
       },
       activity,
       leaderboard: leaderboard.map(r => ({

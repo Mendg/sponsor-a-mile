@@ -155,6 +155,21 @@ export default function DayPage() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <StreakCounter streak={stats.streak} />
+          {stats.freezes_available > 0 && (
+            <div style={{
+              background: 'rgba(59,130,246,0.15)',
+              color: '#2563eb',
+              padding: '3px 8px',
+              borderRadius: '12px',
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '3px'
+            }}>
+              🧊 x{stats.freezes_available}
+            </div>
+          )}
           <TierBadge tier={stats.tier} />
         </div>
       </div>

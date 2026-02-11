@@ -9,6 +9,7 @@ import TeamLeaderboard from '@/components/coaching/TeamLeaderboard';
 import ActivityFeed from '@/components/coaching/ActivityFeed';
 import StreakLadder from '@/components/coaching/StreakLadder';
 import DonorThankCard from '@/components/coaching/DonorThankCard';
+import TeamQuest from '@/components/coaching/TeamQuest';
 import { formatCurrency } from '@/lib/utils';
 
 export default function DashboardPage() {
@@ -16,6 +17,7 @@ export default function DashboardPage() {
   const token = params.token;
 
   const [data, setData] = useState(null);
+  const [quest, setQuest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -24,13 +26,23 @@ export default function DashboardPage() {
 
     async function loadData() {
       try {
-        const res = await fetch(`/api/coaching/runner/${token}`);
-        if (!res.ok) {
-          const errData = await res.json();
+        const [dashRes, questRes] = await Promise.all([
+          fetch(`/api/coaching/runner/${token}`),
+          fetch(`/api/coaching/quest`)
+        ]);
+
+        if (!dashRes.ok) {
+          const errData = await dashRes.json();
           throw new Error(errData.error || 'Failed to load');
         }
-        const dashData = await res.json();
+
+        const dashData = await dashRes.json();
         setData(dashData);
+
+        if (questRes.ok) {
+          const questData = await questRes.json();
+          setQuest(questData.quest);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -77,12 +89,32 @@ export default function DashboardPage() {
             <div style={{ fontWeight: 700, fontSize: '1.05rem' }}>{runner.name.split(' ')[0]}'s Dashboard</div>
           </div>
         </div>
-        <TierBadge tier={stats.tier} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {stats.points_balance > 0 && (
+            <div style={{
+              background: 'rgba(251,191,36,0.2)',
+              color: '#fbbf24',
+              padding: '4px 10px',
+              borderRadius: '16px',
+              fontSize: '0.8rem',
+              fontWeight: '700',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              ⭐ {stats.points_balance}
+            </div>
+          )}
+          <TierBadge tier={stats.tier} />
+        </div>
       </div>
 
       <div className="coaching-body">
         {/* Donor Thank Nudge */}
         <DonorThankCard activity={activity} fundraiseUrl={runner.neon_fundraise_url} />
+
+        {/* Team Quest */}
+        {quest && <TeamQuest quest={quest} />}
 
         {/* Hero: Streak + Progress Ring */}
         <div className="dash-hero">
@@ -97,6 +129,11 @@ export default function DashboardPage() {
               : 'Challenge complete!'
             }
           </div>
+          {stats.freezes_available > 0 && (
+            <div className="freeze-indicator">
+              🧊 x{stats.freezes_available} {stats.freezes_available === 1 ? 'freeze' : 'freezes'} available
+            </div>
+          )}
         </div>
 
         {/* Stats Grid */}
@@ -148,7 +185,7 @@ export default function DashboardPage() {
         )}
 
         {/* Team Leaderboard */}
-        <TeamLeaderboard leaderboard={leaderboard} />
+        <TeamLeaderboard leaderboard={leaderboard} token={token} />
 
         {/* Activity Feed */}
         <ActivityFeed activity={activity} />
