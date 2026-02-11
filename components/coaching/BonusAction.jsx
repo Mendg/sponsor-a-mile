@@ -51,9 +51,26 @@ const BONUS_ACTIONS = [
   },
 ];
 
-export default function BonusAction({ dayNumber, fundraiseUrl }) {
-  const [dismissed, setDismissed] = useState(false);
-  const [didIt, setDidIt] = useState(false);
+export default function BonusAction({ dayNumber, fundraiseUrl, token }) {
+  const storageKey = token ? `bonus_${token}_day${dayNumber}` : null;
+
+  const [dismissed, setDismissed] = useState(() => {
+    if (!storageKey) return false;
+    try {
+      return localStorage.getItem(`${storageKey}_dismissed`) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const [didIt, setDidIt] = useState(() => {
+    if (!storageKey) return false;
+    try {
+      return localStorage.getItem(`${storageKey}_done`) === 'true';
+    } catch {
+      return false;
+    }
+  });
 
   const bonus = useMemo(() => {
     return BONUS_ACTIONS[(dayNumber - 1) % BONUS_ACTIONS.length];
@@ -81,13 +98,31 @@ export default function BonusAction({ dayNumber, fundraiseUrl }) {
     }
   };
 
+  const handleDismiss = () => {
+    setDismissed(true);
+    if (storageKey) {
+      try {
+        localStorage.setItem(`${storageKey}_dismissed`, 'true');
+      } catch {}
+    }
+  };
+
+  const handleDidIt = () => {
+    setDidIt(true);
+    if (storageKey) {
+      try {
+        localStorage.setItem(`${storageKey}_done`, 'true');
+      } catch {}
+    }
+  };
+
   if (dismissed) return null;
 
   return (
     <div className="bonus-card">
       <div className="bonus-header">
         <span className="bonus-badge">Bonus Challenge</span>
-        <button className="bonus-dismiss" onClick={() => setDismissed(true)}>×</button>
+        <button className="bonus-dismiss" onClick={handleDismiss}>×</button>
       </div>
       <div className="bonus-content">
         <span className="bonus-emoji">{bonus.emoji}</span>
@@ -103,7 +138,7 @@ export default function BonusAction({ dayNumber, fundraiseUrl }) {
           </button>
         )}
         {!didIt ? (
-          <button className="bonus-btn" onClick={() => setDidIt(true)}>
+          <button className="bonus-btn" onClick={handleDidIt}>
             Did it!
           </button>
         ) : (

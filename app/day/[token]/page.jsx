@@ -252,7 +252,11 @@ export default function DayPage() {
         {/* Post-completion engagement */}
         {progress.completed && (
           <>
-            <BonusAction dayNumber={day.day_number} fundraiseUrl={runner.neon_fundraise_url} />
+            <BonusAction
+              dayNumber={day.day_number}
+              fundraiseUrl={runner.neon_fundraise_url}
+              token={token}
+            />
             <TomorrowTeaser nextDay={data.next_day} />
           </>
         )}
