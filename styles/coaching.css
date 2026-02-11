@@ -184,6 +184,7 @@
   color: var(--fc-navy);
   line-height: 1.25;
   margin: 0 0 6px;
+  letter-spacing: -0.3px;
 }
 
 .day-sms-preview {
@@ -274,10 +275,6 @@
   background: linear-gradient(180deg, rgba(54, 187, 174, 0.02) 0%, white 100%);
 }
 
-.action-card:active {
-  transform: scale(0.995);
-  transition: transform 0.1s ease;
-}
 
 .action-header {
   display: flex;
