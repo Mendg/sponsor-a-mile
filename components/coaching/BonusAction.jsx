@@ -5,45 +5,81 @@ import { useState, useMemo } from 'react';
 const BONUS_ACTIONS = [
   {
     text: "Send a personal thank you to your most recent donor",
-    emoji: "💌"
+    emoji: "💌",
+    action: "sms",
+    actionLabel: "Open Messages"
   },
   {
     text: "Share a teammate's fundraising page instead of yours",
-    emoji: "🤝"
+    emoji: "🤝",
+    action: null
   },
   {
     text: "Text someone you haven't asked yet",
-    emoji: "📱"
+    emoji: "📱",
+    action: "sms",
+    actionLabel: "Open Messages"
   },
   {
     text: "Post your fundraising link on your social media story",
-    emoji: "📸"
+    emoji: "📸",
+    action: "share",
+    actionLabel: "Share Now"
   },
   {
     text: "Send a voice note to a potential donor instead of a text",
-    emoji: "🎤"
+    emoji: "🎤",
+    action: "whatsapp",
+    actionLabel: "Open WhatsApp"
   },
   {
     text: "Thank someone who shared your page or donated",
-    emoji: "🙏"
+    emoji: "🙏",
+    action: "sms",
+    actionLabel: "Open Messages"
   },
   {
     text: "Text a friend: 'Can you share my page with 3 people?'",
-    emoji: "🔄"
+    emoji: "🔄",
+    action: "sms",
+    actionLabel: "Open Messages"
   },
   {
     text: "Update your fundraising page with a personal story or photo",
-    emoji: "✏️"
+    emoji: "✏️",
+    action: null
   },
 ];
 
-export default function BonusAction({ dayNumber }) {
+export default function BonusAction({ dayNumber, fundraiseUrl }) {
   const [dismissed, setDismissed] = useState(false);
   const [didIt, setDidIt] = useState(false);
 
   const bonus = useMemo(() => {
     return BONUS_ACTIONS[(dayNumber - 1) % BONUS_ACTIONS.length];
   }, [dayNumber]);
+
+  const handleAction = () => {
+    if (bonus.action === 'sms') {
+      // Open native SMS app
+      window.location.href = 'sms:';
+    } else if (bonus.action === 'whatsapp') {
+      // Open WhatsApp
+      window.location.href = 'https://wa.me/';
+    } else if (bonus.action === 'share' && fundraiseUrl) {
+      // Open share sheet
+      if (navigator.share) {
+        navigator.share({
+          title: 'Support My Fundraiser',
+          url: fundraiseUrl
+        }).catch(() => {});
+      } else {
+        // Fallback: copy link
+        navigator.clipboard.writeText(fundraiseUrl);
+        alert('Link copied to clipboard!');
+      }
+    }
+  };
 
   if (dismissed) return null;
 
@@ -57,13 +93,23 @@ export default function BonusAction({ dayNumber }) {
         <span className="bonus-emoji">{bonus.emoji}</span>
         <span className="bonus-text">{bonus.text}</span>
       </div>
-      {!didIt ? (
-        <button className="bonus-btn" onClick={() => setDidIt(true)}>
-          Did it!
-        </button>
-      ) : (
-        <div className="bonus-done">Nice! Every little bit counts.</div>
-      )}
+      <div style={{ display: 'flex', gap: '8px' }}>
+        {bonus.action && (
+          <button
+            className="bonus-action-btn"
+            onClick={handleAction}
+          >
+            {bonus.actionLabel}
+          </button>
+        )}
+        {!didIt ? (
+          <button className="bonus-btn" onClick={() => setDidIt(true)}>
+            Did it!
+          </button>
+        ) : (
+          <div className="bonus-done">Nice! Every little bit counts.</div>
+        )}
+      </div>
     </div>
   );
 }
