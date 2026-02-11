@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 const BONUS_ACTIONS = [
   {
@@ -54,23 +54,20 @@ const BONUS_ACTIONS = [
 export default function BonusAction({ dayNumber, fundraiseUrl, token }) {
   const storageKey = token ? `bonus_${token}_day${dayNumber}` : null;
 
-  const [dismissed, setDismissed] = useState(() => {
-    if (!storageKey) return false;
-    try {
-      return localStorage.getItem(`${storageKey}_dismissed`) === 'true';
-    } catch {
-      return false;
-    }
-  });
+  const [dismissed, setDismissed] = useState(false);
+  const [didIt, setDidIt] = useState(false);
 
-  const [didIt, setDidIt] = useState(() => {
-    if (!storageKey) return false;
+  useEffect(() => {
+    if (!storageKey) return;
     try {
-      return localStorage.getItem(`${storageKey}_done`) === 'true';
-    } catch {
-      return false;
-    }
-  });
+      if (localStorage.getItem(`${storageKey}_dismissed`) === 'true') {
+        setDismissed(true);
+      }
+      if (localStorage.getItem(`${storageKey}_done`) === 'true') {
+        setDidIt(true);
+      }
+    } catch {}
+  }, [storageKey]);
 
   const bonus = useMemo(() => {
     return BONUS_ACTIONS[(dayNumber - 1) % BONUS_ACTIONS.length];

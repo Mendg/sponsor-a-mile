@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { getRunnerByToken, getCoachingDay, getStreak, getTier, getTotalRaised } from '@/lib/coaching';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/coaching/day/[token]/[dayNumber]
 // Returns day content + runner context for the action page
 export async function GET(request, { params }) {

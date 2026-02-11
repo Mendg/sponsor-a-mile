@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getRunnerByToken, getStreak, getTier, getNextTier, getTotalRaised, getDaysCompleted, getActivity, getTeamLeaderboard, getDayForDate, getStreakFreezeStatus, getPoints, getPointMilestone } from '@/lib/coaching';
 import { getRunnerStats } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/coaching/runner/[token]
 // Returns full dashboard data for a runner
 export async function GET(request, { params }) {

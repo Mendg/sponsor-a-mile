@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getCurrentTeamQuest, updateTeamQuestProgress } from '@/lib/coaching';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/coaching/quest
 // Returns current active team quest with progress
 export async function GET() {
