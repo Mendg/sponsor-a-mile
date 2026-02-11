@@ -1,38 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-
-const CONFETTI_COLORS = ['#36bbae', '#1b365d', '#ff6b35', '#22c55e', '#f59e0b', '#8b5cf6'];
-
-function createConfetti() {
-  const pieces = [];
-  for (let i = 0; i < 50; i++) {
-    const piece = document.createElement('div');
-    piece.className = 'confetti-piece';
-    piece.style.left = `${Math.random() * 100}vw`;
-    piece.style.backgroundColor = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
-    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-    piece.style.width = `${6 + Math.random() * 8}px`;
-    piece.style.height = `${6 + Math.random() * 8}px`;
-    piece.style.animationDuration = `${2 + Math.random() * 2}s`;
-    piece.style.animationDelay = `${Math.random() * 0.5}s`;
-    document.body.appendChild(piece);
-    pieces.push(piece);
-  }
-
-  setTimeout(() => {
-    pieces.forEach(p => p.remove());
-  }, 5000);
-}
+import CompletionCelebration from './CompletionCelebration';
 
 export default function MarkCompleteButton({ token, dayNumber, isCompleted, easyMode, onComplete }) {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(isCompleted);
+  const [celebrationData, setCelebrationData] = useState(null);
 
-  if (done) {
+  if (done && !celebrationData) {
     return (
       <button className="complete-btn completed" disabled>
-        ✓ Completed!
+        Done
       </button>
     );
   }
@@ -49,7 +28,7 @@ export default function MarkCompleteButton({ token, dayNumber, isCompleted, easy
       const data = await res.json();
       if (data.success) {
         setDone(true);
-        createConfetti();
+        setCelebrationData(data);
         if (onComplete) onComplete(data);
       }
     } catch (err) {
@@ -60,12 +39,30 @@ export default function MarkCompleteButton({ token, dayNumber, isCompleted, easy
   };
 
   return (
-    <button
-      className={`complete-btn ${loading ? 'loading' : ''}`}
-      onClick={handleComplete}
-      disabled={loading}
-    >
-      {loading ? 'Saving...' : "I Did It! ✨"}
-    </button>
+    <>
+      {!done && (
+        <button
+          className={`complete-btn ${loading ? 'loading' : ''}`}
+          onClick={handleComplete}
+          disabled={loading}
+        >
+          {loading ? (
+            <span className="btn-loading-dots">
+              <span>.</span><span>.</span><span>.</span>
+            </span>
+          ) : "I Did It!"}
+        </button>
+      )}
+      {celebrationData && (
+        <CompletionCelebration
+          streak={celebrationData.streak}
+          dayNumber={dayNumber}
+          totalRaised={celebrationData.total_raised || 0}
+          tier={celebrationData.tier}
+          token={token}
+          onDismiss={() => setCelebrationData(null)}
+        />
+      )}
+    </>
   );
 }

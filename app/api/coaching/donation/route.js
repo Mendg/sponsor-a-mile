@@ -5,21 +5,65 @@ import { sendSMS, buildDonationSMS, buildMilestoneSMS } from '@/lib/sms';
 
 // POST /api/coaching/donation
 // Neon Fundraise webhook via Make.com
-// Body: { runner_id, donor_name, donor_email, amount, transaction_id }
+// Body: { donor_name, amount, fundraiser, secret }
+// OR legacy: { runner_id, donor_name, donor_email, amount, transaction_id }
 export async function POST(request) {
   try {
-    const webhookSecret = request.headers.get('x-webhook-secret');
-    if (process.env.WEBHOOK_SECRET && webhookSecret !== process.env.WEBHOOK_SECRET) {
+    const body = await request.json();
+
+    // Auth: check secret in body (Make.com) or x-webhook-secret header
+    const secret = body.secret || request.headers.get('x-webhook-secret');
+    const expectedSecret = process.env.COACHING_WEBHOOK_SECRET || process.env.WEBHOOK_SECRET;
+    if (expectedSecret && secret !== expectedSecret) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { runner_id, donor_name, donor_email, amount, transaction_id } = await request.json();
+    const { donor_name, donor_email, amount, transaction_id, fundraiser } = body;
+    let { runner_id } = body;
 
-    if (!runner_id || !amount) {
-      return NextResponse.json({ error: 'Missing runner_id or amount' }, { status: 400 });
+    if (!amount) {
+      return NextResponse.json({ error: 'Missing amount' }, { status: 400 });
     }
 
     const db = getDb();
+
+    // If fundraiser name provided instead of runner_id, look up the runner
+    if (!runner_id && fundraiser) {
+      const matches = await db`
+        SELECT id, name FROM runners
+        WHERE coaching_active = true
+          AND LOWER(name) = LOWER(${fundraiser.trim()})
+      `;
+      // Try partial match if exact fails
+      if (matches.length === 0) {
+        const partialMatches = await db`
+          SELECT id, name FROM runners
+          WHERE coaching_active = true
+            AND (LOWER(name) LIKE LOWER(${`%${fundraiser.trim()}%`})
+              OR LOWER(${fundraiser.trim()}) LIKE LOWER(CONCAT('%', name, '%')))
+        `;
+        if (partialMatches.length === 1) {
+          runner_id = partialMatches[0].id;
+        } else {
+          // No match found, just log and return success (don't break Make.com flow)
+          return NextResponse.json({
+            success: true,
+            matched: false,
+            message: `No coaching runner matched for fundraiser: ${fundraiser}`
+          });
+        }
+      } else {
+        runner_id = matches[0].id;
+      }
+    }
+
+    if (!runner_id) {
+      return NextResponse.json({
+        success: true,
+        matched: false,
+        message: 'No runner_id or fundraiser provided, skipping'
+      });
+    }
 
     // Check for duplicate transaction
     if (transaction_id) {

@@ -6,8 +6,10 @@ import { sendSMS, buildDailySMS } from '@/lib/sms';
 // Triggered by Make.com cron at 8am ET (Sun-Fri)
 export async function POST(request) {
   try {
-    const webhookSecret = request.headers.get('x-webhook-secret');
-    if (process.env.WEBHOOK_SECRET && webhookSecret !== process.env.WEBHOOK_SECRET) {
+    const body = await request.json().catch(() => ({}));
+    const secret = body.secret || request.headers.get('x-webhook-secret');
+    const expectedSecret = process.env.COACHING_WEBHOOK_SECRET || process.env.WEBHOOK_SECRET;
+    if (expectedSecret && secret !== expectedSecret) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

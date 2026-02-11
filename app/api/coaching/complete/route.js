@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { getRunnerByToken, getStreak, checkMilestones, logActivity, getTotalRaised } from '@/lib/coaching';
+import { getRunnerByToken, getStreak, checkMilestones, logActivity, getTotalRaised, getTier } from '@/lib/coaching';
 import { sendSMS, buildMilestoneSMS } from '@/lib/sms';
 
 // POST /api/coaching/complete
@@ -40,6 +40,7 @@ export async function POST(request) {
     // Calculate updated streak
     const streak = await getStreak(runner.id);
     const totalRaised = await getTotalRaised(runner.id);
+    const tier = getTier(totalRaised);
 
     // Check for milestone achievements
     const milestones = await checkMilestones(runner.id);
@@ -70,6 +71,7 @@ export async function POST(request) {
       success: true,
       streak,
       total_raised: totalRaised,
+      tier,
       milestones: milestones.map(m => m.type)
     });
   } catch (error) {

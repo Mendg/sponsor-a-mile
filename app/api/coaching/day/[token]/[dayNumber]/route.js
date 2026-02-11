@@ -18,7 +18,10 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const dayContent = await getCoachingDay(dayNum);
+    const [dayContent, nextDayContent] = await Promise.all([
+      getCoachingDay(dayNum),
+      dayNum < 24 ? getCoachingDay(dayNum + 1) : null
+    ]);
     if (!dayContent) {
       return NextResponse.json({ error: `No content for day ${dayNum}` }, { status: 404 });
     }
@@ -55,6 +58,11 @@ export async function GET(request, { params }) {
         easy_mode_templates: dayContent.easy_mode_templates,
         phase: dayContent.phase
       },
+      next_day: nextDayContent ? {
+        day_number: nextDayContent.day_number,
+        title: nextDayContent.title,
+        phase: nextDayContent.phase
+      } : null,
       progress: {
         completed: progress.length > 0 && progress[0].completed,
         completed_at: progress.length > 0 ? progress[0].completed_at : null,
