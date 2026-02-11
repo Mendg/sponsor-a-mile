@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import CompletionCelebration from './CompletionCelebration';
 
-export default function MarkCompleteButton({ token, dayNumber, isCompleted, easyMode, onComplete }) {
+export default function MarkCompleteButton({ token, dayNumber, isCompleted, easyMode, onComplete, runnerName }) {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(isCompleted);
   const [celebrationData, setCelebrationData] = useState(null);
@@ -60,6 +60,8 @@ export default function MarkCompleteButton({ token, dayNumber, isCompleted, easy
           totalRaised={celebrationData.total_raised || 0}
           tier={celebrationData.tier}
           token={token}
+          milestones={celebrationData.milestones || []}
+          runnerName={runnerName}
           onDismiss={() => setCelebrationData(null)}
         />
       )}

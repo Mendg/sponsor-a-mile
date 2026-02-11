@@ -1683,6 +1683,30 @@
   text-decoration: none;
 }
 
+.celebration-achievement {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.celebration-achievement-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--fc-navy);
+  margin-bottom: 10px;
+  letter-spacing: 0.3px;
+}
+
+.celebration-achievement .achievement-share-container {
+  transform: scale(0.55);
+  transform-origin: top center;
+  margin-bottom: -120px;
+}
+
+.celebration-achievement .share-achievement-btn {
+  font-size: 0.8rem;
+  padding: 8px 16px;
+}
+
 /* ===== Tomorrow Teaser ===== */
 .tomorrow-card {
   background: white;
@@ -1906,4 +1930,107 @@
   background: #f0fdf4;
   color: #128c7e;
   border: 1.5px solid #bbf7d0;
+}
+
+.donor-thank-btn.graphic {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1.5px solid #bfdbfe;
+  min-width: 44px;
+  padding: 8px;
+}
+
+.donor-graphic-section {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.donor-graphic-card {
+  width: 300px;
+  height: 400px;
+  background: linear-gradient(145deg, #1b365d 0%, #0f2340 60%, #1b365d 100%);
+  border-radius: 16px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.donor-graphic-card::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -30%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(54, 187, 174, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.donor-graphic-bh {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 0.6rem;
+  opacity: 0.5;
+}
+
+.donor-graphic-emoji {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+
+.donor-graphic-thank {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+
+.donor-graphic-donor {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #36bbae;
+  margin-bottom: 6px;
+}
+
+.donor-graphic-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+}
+
+.donor-graphic-message {
+  font-size: 0.8rem;
+  text-align: center;
+  opacity: 0.85;
+  line-height: 1.4;
+  max-width: 240px;
+  margin-bottom: 20px;
+}
+
+.donor-graphic-branding {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.donor-graphic-logo {
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.3px;
+}
+
+.donor-graphic-event {
+  font-size: 0.65rem;
+  opacity: 0.7;
 }

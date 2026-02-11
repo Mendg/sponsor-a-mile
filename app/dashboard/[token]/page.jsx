@@ -111,7 +111,7 @@ export default function DashboardPage() {
 
       <div className="coaching-body">
         {/* Donor Thank Nudge */}
-        <DonorThankCard activity={activity} fundraiseUrl={runner.neon_fundraise_url} />
+        <DonorThankCard activity={activity} fundraiseUrl={runner.neon_fundraise_url} runnerName={runner.name.split(' ')[0]} />
 
         {/* Team Quest */}
         {quest && <TeamQuest quest={quest} />}

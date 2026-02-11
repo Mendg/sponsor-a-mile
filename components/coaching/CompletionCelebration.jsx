@@ -48,9 +48,16 @@ function getCelebrationEmoji(dayNumber, streak) {
   return '🎉';
 }
 
-export default function CompletionCelebration({ streak, dayNumber, totalRaised, tier, token, onDismiss }) {
+export default function CompletionCelebration({ streak, dayNumber, totalRaised, tier, token, milestones, runnerName, onDismiss }) {
   const [animatedStreak, setAnimatedStreak] = useState(streak - 1);
   const [show, setShow] = useState(false);
+  const [AchievementCard, setAchievementCard] = useState(null);
+
+  useEffect(() => {
+    if (milestones && milestones.length > 0) {
+      import('./AchievementCard').then(mod => setAchievementCard(() => mod.default));
+    }
+  }, [milestones]);
 
   useEffect(() => {
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
@@ -109,6 +116,13 @@ export default function CompletionCelebration({ streak, dayNumber, totalRaised, 
             </>
           )}
         </div>
+
+        {milestones && milestones.length > 0 && AchievementCard && (
+          <div className="celebration-achievement">
+            <div className="celebration-achievement-label">You earned this!</div>
+            <AchievementCard type={milestones[0]} runnerName={runnerName} />
+          </div>
+        )}
 
         <button className="celebration-dismiss" onClick={onDismiss}>
           {dayNumber === 24 ? 'Celebrate!' : 'Continue'}

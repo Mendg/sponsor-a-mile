@@ -247,6 +247,7 @@ export default function DayPage() {
           isCompleted={progress.completed}
           easyMode={easyMode}
           onComplete={handleComplete}
+          runnerName={runner.name}
         />
 
         {/* Post-completion engagement */}
