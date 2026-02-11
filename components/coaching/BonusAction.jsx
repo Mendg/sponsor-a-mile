@@ -125,7 +125,7 @@ export default function BonusAction({ dayNumber, fundraiseUrl, token }) {
         <span className="bonus-emoji">{bonus.emoji}</span>
         <span className="bonus-text">{bonus.text}</span>
       </div>
-      <div style={{ display: 'flex', gap: '8px' }}>
+      <div className="bonus-actions">
         {bonus.action && (
           <button
             className="bonus-action-btn"

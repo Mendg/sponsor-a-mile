@@ -1587,9 +1587,29 @@
   line-height: 1.4;
 }
 
-.bonus-btn {
+.bonus-actions {
+  display: flex;
+  gap: 8px;
   margin-top: 10px;
-  width: 100%;
+}
+
+.bonus-action-btn {
+  flex: 1;
+  padding: 10px;
+  background: white;
+  color: #78350f;
+  border: 1.5px solid #fde68a;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.bonus-action-btn:active { transform: scale(0.97); }
+
+.bonus-btn {
+  flex: 1;
   padding: 10px;
   background: #f59e0b;
   color: white;
@@ -1604,14 +1624,14 @@
 .bonus-btn:active { transform: scale(0.97); }
 
 .bonus-done {
-  margin-top: 10px;
+  flex: 1;
   text-align: center;
   font-size: 0.82rem;
   font-weight: 600;
   color: #065f46;
   background: #d1fae5;
-  padding: 8px;
-  border-radius: 8px;
+  padding: 10px;
+  border-radius: 10px;
 }
 
 /* ===== Donor Thank Card ===== */
