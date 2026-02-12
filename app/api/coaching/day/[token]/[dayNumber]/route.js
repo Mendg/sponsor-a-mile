@@ -43,6 +43,30 @@ export async function GET(request, { params }) {
 
     const tier = getTier(totalRaised);
 
+    // Interpolate runner-specific values into templates
+    const goalAmount = parseFloat(runner.goal_amount) || 0;
+    const pricePerMile = parseFloat(runner.price_per_mile) || 36;
+    const firstName = runner.name.split(' ')[0];
+    const fundraiseUrl = runner.neon_fundraise_url || runner.donation_url || '';
+
+    function interpolate(text) {
+      if (!text) return text;
+      return text
+        .replace(/raise 0([^0-9]|$)/g, `raise $${goalAmount.toLocaleString()}$1`)
+        .replace(/goal of 0([^0-9]|$)/g, `goal of $${goalAmount.toLocaleString()}$1`)
+        .replace(/raised 0 /g, `raised $${Math.round(totalRaised).toLocaleString()} `)
+        .replace(/ 0 of 0/g, ` $${Math.round(totalRaised).toLocaleString()} of $${goalAmount.toLocaleString()}`)
+        .replace(/sponsor a mile for \?/gi, `sponsor a mile for $${pricePerMile}?`)
+        .replace(/sponsor a mile for  on/gi, `sponsor a mile for $${pricePerMile} on`)
+        .replace(/a mile for \$/g, `a mile for $${pricePerMile} ($`)
+        .replace(/\(sponsor a mile\)/gi, `(sponsor a mile for $${pricePerMile})`)
+        .replace(/miles for  \//g, `miles for $${pricePerMile * 5} /`)
+        .replace(/for  \/ the finish/g, `for $${pricePerMile * 5} / the finish`)
+        .replace(/the finish line for \]/g, `the finish line for $${pricePerMile}]`)
+        .replace(/raise  in/g, `raise $${Math.round(goalAmount * 0.1)} in`)
+        .replace(/\[URL\]/g, fundraiseUrl);
+    }
+
     return NextResponse.json({
       runner: {
         id: runner.id,
@@ -54,10 +78,11 @@ export async function GET(request, { params }) {
         day_number: dayContent.day_number,
         title: dayContent.title,
         lesson: dayContent.lesson,
-        action_prompt: dayContent.action_prompt,
-        templates: dayContent.templates,
-        easy_mode_prompt: dayContent.easy_mode_prompt,
-        easy_mode_templates: dayContent.easy_mode_templates,
+        action_prompt: interpolate(dayContent.action_prompt),
+        templates: interpolate(dayContent.templates),
+        easy_mode_prompt: interpolate(dayContent.easy_mode_prompt),
+        easy_mode_templates: interpolate(dayContent.easy_mode_templates),
+        sms_text: dayContent.sms_text,
         phase: dayContent.phase
       },
       next_day: nextDayContent ? {

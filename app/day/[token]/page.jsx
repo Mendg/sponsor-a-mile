@@ -73,14 +73,19 @@ export default function DayPage() {
   useEffect(() => {
     if (data && token) {
       try {
-        const welcomed = localStorage.getItem(`coaching_welcomed_${token}`);
+        const lsKey = `coaching_welcomed_${token}`;
+        const cookieKey = `cw_${token}`;
+        const welcomed = localStorage.getItem(lsKey) || document.cookie.includes(cookieKey);
         if (!welcomed) setShowWelcome(true);
       } catch {}
     }
   }, [data, token]);
 
   const handleWelcomeDismiss = () => {
-    try { localStorage.setItem(`coaching_welcomed_${token}`, 'true'); } catch {}
+    try {
+      localStorage.setItem(`coaching_welcomed_${token}`, 'true');
+      document.cookie = `cw_${token}=1; max-age=${60 * 60 * 24 * 90}; path=/`;
+    } catch {}
     setShowWelcome(false);
   };
 

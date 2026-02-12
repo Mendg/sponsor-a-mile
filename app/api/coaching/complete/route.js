@@ -21,6 +21,13 @@ export async function POST(request) {
 
     const db = getDb();
 
+    // Check if already completed (prevent duplicate activity/points)
+    const existing = await db`
+      SELECT id FROM coaching_progress
+      WHERE runner_id = ${runner.id} AND day_number = ${day_number} AND completed = true
+    `;
+    const alreadyCompleted = existing.length > 0;
+
     // Upsert completion (idempotent)
     await db`
       INSERT INTO coaching_progress (runner_id, day_number, completed, completed_at, easy_mode)
@@ -29,24 +36,24 @@ export async function POST(request) {
       DO UPDATE SET completed = true, completed_at = NOW(), easy_mode = ${easy_mode}
     `;
 
-    // Log activity
-    await logActivity({
-      runnerId: runner.id,
-      eventType: 'action_completed',
-      title: `Completed Day ${day_number}`,
-      detail: easy_mode ? 'Easy mode' : null
-    });
+    // Only log activity and award points on first completion
+    if (!alreadyCompleted) {
+      await logActivity({
+        runnerId: runner.id,
+        eventType: 'action_completed',
+        title: `Completed Day ${day_number}`,
+        detail: easy_mode ? 'Easy mode' : null
+      });
 
-    // Award points for completion
-    await awardPoints({
-      runnerId: runner.id,
-      points: POINTS_VALUES.DAILY_COMPLETION,
-      reason: 'daily_completion',
-      details: `Day ${day_number} completed`
-    });
+      await awardPoints({
+        runnerId: runner.id,
+        points: POINTS_VALUES.DAILY_COMPLETION,
+        reason: 'daily_completion',
+        details: `Day ${day_number} completed`
+      });
 
-    // Record quest participation
-    await recordQuestParticipation(runner.id, 1);
+      await recordQuestParticipation(runner.id, 1);
+    }
 
     // Calculate updated streak
     const streak = await getStreak(runner.id);
