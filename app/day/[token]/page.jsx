@@ -29,7 +29,7 @@ export default function DayPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [lessonOpen, setLessonOpen] = useState(false);
+  const [lessonOpen, setLessonOpen] = useState(true);
   const [easyMode, setEasyMode] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -138,6 +138,16 @@ export default function DayPage() {
   const currentTemplates = easyMode && day.easy_mode_templates ? day.easy_mode_templates : day.templates;
   const currentPrompt = easyMode && day.easy_mode_prompt ? day.easy_mode_prompt : day.action_prompt;
 
+  // Streak milestone progress
+  const STREAK_MILESTONES = [
+    { at: 3, emoji: '🌱', label: 'Habit Builder' },
+    { at: 7, emoji: '🔥', label: 'On Fire' },
+    { at: 14, emoji: '💪', label: 'Unstoppable' },
+    { at: 21, emoji: '👑', label: 'Legend' },
+  ];
+  const nextMilestone = STREAK_MILESTONES.find(m => m.at > stats.streak);
+  const daysToMilestone = nextMilestone ? nextMilestone.at - stats.streak : 0;
+
   return (
     <div className="coaching-page" style={{ '--phase-accent': phase.accent }}>
       {showWelcome && (
@@ -181,6 +191,26 @@ export default function DayPage() {
 
       {/* Body */}
       <div className="coaching-body">
+        {/* Streak milestone progress + time estimate */}
+        <div className="day-meta-row">
+          <span className="time-badge">⏱️ 2 min</span>
+          {nextMilestone && !progress.completed && (
+            <span className="milestone-progress">
+              {daysToMilestone === 1
+                ? `Complete today for ${nextMilestone.emoji} ${nextMilestone.label}!`
+                : `${daysToMilestone} more days to ${nextMilestone.emoji} ${nextMilestone.label}`
+              }
+            </span>
+          )}
+        </div>
+
+        {/* Streak loss warning */}
+        {!progress.completed && stats.streak >= 2 && (
+          <div className="streak-warning">
+            ⚠️ Complete today or lose your {stats.streak}-day streak!
+          </div>
+        )}
+
         {/* Title with phase accent */}
         <div className="day-title-card" style={{ borderLeftColor: phase.accent }}>
           <h2 className="day-title">{day.title}</h2>
@@ -235,6 +265,13 @@ export default function DayPage() {
                 </button>
               </div>
               <div className="template-text">{currentTemplates}</div>
+              {copied && (
+                <div className="copy-deep-links">
+                  Now send it →
+                  <a href={`sms:?&body=${encodeURIComponent(currentTemplates)}`} className="copy-deep-link">💬 Messages</a>
+                  <a href={`https://wa.me/?text=${encodeURIComponent(currentTemplates)}`} target="_blank" rel="noopener noreferrer" className="copy-deep-link">📱 WhatsApp</a>
+                </div>
+              )}
             </div>
           )}
 
